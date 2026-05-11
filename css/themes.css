@@ -1,0 +1,66 @@
+/* NCC Themes - Light/Dark Mode */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Theme Toggle Script should be in head:
+<script>
+  const theme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+</script>
+*/
+
+/* Dark mode overrides are in tokens.css via [data-theme="dark"] selector */
+
+/* Additional theme-specific utilities */
+[data-theme="dark"] .invert-light {
+  filter: invert(1);
+}
+
+[data-theme="light"] .invert-dark {
+  filter: invert(1);
+}
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000;
+    --text-secondary: #333;
+  }
+  
+  [data-theme="dark"] {
+    --border-color: #fff;
+    --text-secondary: #ccc;
+  }
+}

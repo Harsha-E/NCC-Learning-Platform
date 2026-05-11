@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NCC Cadet Learning Platform</title>
+  
+  <base href="/">
+  
+  <link rel="icon" href="./flaticon.png" type="image/png">
+  <link rel="apple-touch-icon" href="./flaticon.png">
+  <link rel="manifest" href="./manifest.json">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/themes.css">
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes skeleton-pulse {
+        0% { background-color: #1E293B; }
+        50% { background-color: #334155; }
+        100% { background-color: #1E293B; }
+    }
+
+    .skeleton {
+        animation: skeleton-pulse 1.5s ease-in-out infinite;
+        border-radius: 8px;
+        display: block;
+    }
+
+    .skeleton-text { height: 1rem; margin-bottom: 0.5rem; width: 100%; }
+    .skeleton-title { height: 2rem; margin-bottom: 1rem; width: 60%; }
+    .skeleton-card { height: 120px; width: 100%; margin-bottom: 1rem; }
+  </style>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  </script>
+</head>
+<body style="overflow: hidden; margin: 0;">
+  
+  <div id="global-loader" style="position: fixed; inset: 0; background: #0F172A; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease;">
+    <div style="width: 50px; height: 50px; border: 4px solid #1E293B; border-top: 4px solid #FF9933; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    <h2 id="loader-status" style="margin-top: 20px; font-family: 'Poppins', sans-serif; color: #94A3B8;">Initializing...</h2>
+    
+    <div id="screen-error" style="color: #EF4444; margin-top: 20px; font-family: monospace; max-width: 80%; text-align: center; font-weight: bold;"></div>
+  </div>
+
+  <header id="nav-root"></header>
+  <main id="app-root"></main>
+
+  <script type="module" src="./js/components/navbar.js"></script>
+  <script>
+    window.addEventListener('error', function(e) {
+      const loaderStatus = document.getElementById('loader-status');
+      const screenError = document.getElementById('screen-error');
+      if (loaderStatus) {
+        loaderStatus.innerText = 'Fatal Crash Detected 🚨';
+        loaderStatus.style.color = '#EF4444';
+      }
+      if (screenError) {
+        screenError.innerHTML += e.message + '<br><br>Check File: ' + (e.filename || 'Path mismatch/Missing file') + '<br>';
+      }
+    }, true);
+  </script>
+
+  <script type="module" src="./js/core/app.js"></script>
+
+</body>
+</html>
