@@ -5,8 +5,16 @@ const ContentService = {
   normalizeCertId(cert) {
       if (!cert) return 'cert-a';
       const cleanCert = cert.toString().toUpperCase().trim();
-      if (['A', 'B', 'C'].includes(cleanCert)) return `cert-${cleanCert.toLowerCase()}`;
-      return cert.toString().toLowerCase(); 
+      
+      // If input is "A", "B", or "C", try to match "certificate-x" first, then fallback to "cert-x"
+      if (['A', 'B', 'C'].includes(cleanCert)) {
+          const letter = cleanCert.toLowerCase();
+          // We return "certificate-b" if that's what you used in the Admin Tool
+          return `certificate-${letter}`; 
+      }
+      
+      // Fallback for any other custom names
+      return cert.toString().toLowerCase().replace(/\s+/g, '-'); 
   },
 
   // 1. THE GATEKEEPER: Checks if the curriculum was updated by Admin
