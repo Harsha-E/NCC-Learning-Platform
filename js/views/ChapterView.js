@@ -22,7 +22,11 @@ export default class ChapterView extends AbstractView {
     return `
       <style>
         .reader-layout {
-            display: flex; flex-direction: column; height: calc(100vh - 4.5rem);
+            display: flex; flex-direction: column; 
+            height: 100dvh; 
+            /* CLEAR THE FLOATING NAVBAR (2rem top + 4.5rem height) */
+            padding-top: 7.5rem; 
+            box-sizing: border-box;
             background: #020617; color: #E2E8F0; font-family: 'Inter', system-ui, sans-serif;
             overflow: hidden; position: relative;
         }
@@ -45,7 +49,9 @@ export default class ChapterView extends AbstractView {
 
         /* --- THE GLASS BLADE PROGRESS BAR --- */
         #readingProgressContainer {
-            position: fixed; top: 4.5rem; left: 0; right: 0; height: 3px; 
+            position: fixed; 
+            top: 7.5rem; /* Anchored just below the navbar */
+            left: 0; right: 0; height: 3px; 
             background: rgba(255, 255, 255, 0.02); z-index: 5000; 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
@@ -118,12 +124,19 @@ export default class ChapterView extends AbstractView {
         }
         .page-tab.active { background: #38BDF8 !important; transform: scale(1.5) !important; box-shadow: 0 0 12px rgba(56,189,248,0.5) !important; }
 
-        .sidebar-overlay { position: fixed; inset: 0; top: 4.5rem; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(8px); z-index: 3999; opacity: 0; pointer-events: none; transition: 0.4s; }
+        /* --- SIDEBAR FIXES --- */
+        .sidebar-overlay { position: fixed; inset: 0; top: 0; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(8px); z-index: 10000; opacity: 0; pointer-events: none; transition: 0.4s; }
         .sidebar-overlay.active { opacity: 1; pointer-events: all; }
-        .chapter-sidebar { position: fixed; left: 0; top: 4.5rem; bottom: 0; width: 340px; background: #020617; border-right: 1px solid #1E293B; z-index: 4000; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .chapter-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 340px; background: #020617; border-right: 1px solid #1E293B; z-index: 10001; transform: translateX(-100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .chapter-sidebar.active { transform: translateX(0); }
 
-        @media (max-width: 768px) { .chapter-title { display: none; } .reader-header { height: 60px; } }
+        /* --- MOBILE SAFE CLEARANCES --- */
+        @media (max-width: 768px) { 
+            .chapter-title { display: none; } 
+            .reader-header { height: 60px; } 
+            .reader-layout { padding-bottom: 6rem; } /* Clears the mobile dock */
+            .page-nav-bar { bottom: 6.5rem !important; } /* Sits safely above the mobile dock */
+        }
       </style>
 
       <div id="readingProgressContainer"><div id="readingProgress"></div></div>
@@ -181,7 +194,6 @@ export default class ChapterView extends AbstractView {
         this.renderPageContent();
         this.loadSidebar(profile.certificate || 'A', profile.wing);
 
-        // SYNC REVEAL WITH ROUTER
         setTimeout(() => {
             const el = document.getElementById('headerReveal');
             if(el) el.classList.add('reveal');
@@ -229,6 +241,11 @@ export default class ChapterView extends AbstractView {
           this.highestScrollScored = Math.min(total, 100);
           const bar = document.getElementById('readingProgress');
           if (bar) bar.style.width = `${this.highestScrollScored}%`;
+          
+          const user = Store.get('user');
+          if (user) {
+              ProgressService.updateChapterScroll(user.uid, this.moduleId, this.chapterId, this.highestScrollScored);
+          }
       }
   }
 
@@ -265,7 +282,8 @@ export default class ChapterView extends AbstractView {
       const actionArea = document.getElementById('footerActionArea');
       if (actionArea) {
           if (this.activePageIndex < this.pages.length - 1) {
-              actionArea.innerHTML = `<button style="background:#F8FAFC; color:#020617; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;" onclick="window.currentView.nextPage()">Next Objective ▶</button>`;
+              actionArea.innerHTML = `<button style="background:#F8FAFC; color:#020617; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;" id="btnNextPageNative">Next Objective ▶</button>`;
+              document.getElementById('btnNextPageNative').onclick = () => this.nextPage();
           } else {
               actionArea.innerHTML = `<button id="btnTakeExam" style="background:linear-gradient(135deg, #10B981, #059669); color:white; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;">Initiate Assessment ✓</button>`;
               const btn = document.getElementById('btnTakeExam');
@@ -289,6 +307,11 @@ export default class ChapterView extends AbstractView {
       document.getElementById('rippleChapterTitle').textContent = this.contentData.title;
       ripple.style.transform = 'translate(-50%,-50%) scale(600)';
       rippleText.style.opacity = '1';
+      
+      const user = Store.get('user');
+      if (user) {
+          ProgressService.updateChapterScroll(user.uid, this.moduleId, this.chapterId, 100);
+      }
       
       setTimeout(() => {
           Router.navigateTo(`./quiz?module=${this.moduleId}&chapter=${this.chapterId}`);

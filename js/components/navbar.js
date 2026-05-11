@@ -116,8 +116,14 @@ class NavbarComponent {
             let mobileDockHtml = '';
 
             if (isAdmin) {
-                linksHtml = `<a href="./admin/dashboard" class="nav-item ${isActive('admin')}" data-nav>Command Center</a>`;
-                mobileDockHtml = `<a href="./admin/dashboard" class="dock-item ${isActive('admin')}" data-nav title="Command Center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg></a>`;
+                linksHtml = `
+                    <a href="./admin/dashboard" class="nav-item ${isActive('dashboard')}" data-nav>Edit Content and Q/A</a>
+                    <a href="./admin/blueprint" class="nav-item ${isActive('blueprint')}" data-nav>Mock Blueprints</a>
+                `;
+                mobileDockHtml = `
+                    <a href="./admin/dashboard" class="dock-item ${isActive('dashboard')}" data-nav title="Forge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></a>
+                    <a href="./admin/blueprint" class="dock-item ${isActive('blueprint')}" data-nav title="Blueprint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></a>
+                `;
             } else {
                 linksHtml = `
                     <a href="./dashboard" class="nav-item ${isActive('dashboard')}" data-nav>Dashboard</a>
@@ -133,7 +139,7 @@ class NavbarComponent {
 
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot"></div><span>NCC CORE</span></div>
+                    <div class="nav-brand"><div class="brand-dot"></div><span>Learning Platform</span></div>
                     <div class="nav-links">${linksHtml}</div>
                     <div class="nav-actions">
                         <a href="./profile" class="icon-btn" data-nav title="Profile"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
@@ -148,7 +154,7 @@ class NavbarComponent {
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         </div>
                         <h3 class="logout-title">Terminate Session?</h3>
-                        <p class="logout-desc">You are about to sever your connection to the NCC Terminal. Active unsaved telemetry may be lost.</p>
+                        <p class="logout-desc">You are about to sever your connection to the NCC Learning Platform.</p>
                         <div class="logout-actions">
                             <button class="modal-btn btn-cancel" id="cancelLogout">Abort</button>
                             <button class="modal-btn btn-confirm" id="confirmLogout">Log Out</button>
@@ -159,10 +165,10 @@ class NavbarComponent {
         } else {
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC CORE</span></div>
+                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>Learning Platform</span></div>
                     <div class="nav-actions">
                         <a href="./login" class="nav-auth-btn" data-nav>Sign In</a>
-                        <a href="./register" class="nav-auth-btn primary" data-nav>Deploy Profile</a>
+                        <a href="./register" class="nav-auth-btn primary" data-nav>Register</a>
                     </div>
                 </nav>
             `;
@@ -201,7 +207,7 @@ class NavbarComponent {
                 if (AuthService && typeof AuthService.logout === 'function') {
                     await AuthService.logout();
                 }
-                if (window.Router) window.Router.navigateTo('./login');
+                if (window.Router) window.Router.navigateTo('./');
             };
         }
     }

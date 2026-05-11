@@ -18,6 +18,7 @@ const ROUTES = {
   '/forgot-password': { view: () => import('../views/ForgotPasswordView.js'), rules: { guestOnly: true } },
   '/profile': { view: () => import('../views/ProfileView.js'), rules: { requireAuth: true } },
   '/admin/dashboard': { view: () => import('../views/AdminDashboardView.js'), rules: { requireAuth: true, role: 'admin' } },
+  '/admin/blueprint': { view: () => import('../views/BlueprintView.js'), rules: { requireAuth: true, role: 'admin' } },
   '/mock-exam': { view: () => import('../views/MockExamView.js'), rules: { requireAuth: true } },
   '/404': { view: () => import('../views/Error404View.js'), rules: {} }
 };
@@ -175,8 +176,8 @@ export default class Router {
     };
 
     if (route.rules.requireAuth && !user) {
-      window.history.replaceState(null, null, createSafeUrl('/login'));
-      route = ROUTES['/login'];
+      window.history.replaceState(null, null, createSafeUrl('/'));
+      route = ROUTES['/'];
     } else if (route.rules.guestOnly && user) {
       const targetRoute = (role === 'admin' || role === 'superadmin') ? '/admin/dashboard' : '/dashboard';
       window.history.replaceState(null, null, createSafeUrl(targetRoute));

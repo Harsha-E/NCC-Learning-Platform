@@ -1,12 +1,45 @@
 import { getFunctionsInstance, httpsCallable } from '../core/firebase-init.js';
-import ProgressService from './progress.service.js';
+import ContentService from './content.service.js'; // Added to fetch curriculum structure
 
 class QuizService {
   /**
+   * Aggregates all available quizzes (assessments) for the cadet's certificate.
+   * @param {string} certificate - The cadet's certificate (e.g., 'A', 'B', 'C').
+   * @returns {Promise<Array>} A flat list of available quiz objects.
+   */
+  async getAvailableQuizzes(certificate) {
+    try {
+      // 1. Fetch all modules for the current certificate
+      const modules = await ContentService.getModules(certificate);
+      const allQuizzes = [];
+
+      // 2. Iterate through modules to find chapters (which serve as quiz topics)
+      for (const mod of modules) {
+        const chapters = await ContentService.getChapters(certificate, mod.id);
+        
+        chapters.forEach(chap => {
+          // In NCC-v3, every chapter has a corresponding tactical assessment
+          allQuizzes.push({
+            moduleId: mod.id,
+            chapterId: chap.id,
+            moduleTitle: mod.title,
+            title: `${chap.title} Assessment`,
+            description: `Final tactical evaluation for the ${chap.title} phase.`,
+            duration: 10, // Standard 10-minute duration
+            questionCount: 10 // Standard 10-question evaluation
+          });
+        });
+      }
+      
+      return allQuizzes;
+    } catch (error) {
+      console.error('[QuizService] Error aggregating available quizzes:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetches quiz questions from the secure backend.
-   * @param {string} moduleId - The ID of the module being tested.
-   * @param {string|null} chapterId - Optional chapter ID for chapter-based quizzes.
-   * @returns {Promise<Object>} The quiz payload from the backend.
    */
   async fetchQuestions(moduleId, chapterId = null) {
     try {
@@ -22,9 +55,6 @@ class QuizService {
 
   /**
    * Submits quiz answers to the backend for validation and grading.
-   * @param {string} moduleId - The ID of the module being tested.
-   * @param {Object} answers - A map of question IDs to the selected answer index.
-   * @returns {Promise<Object>} The grading result including score and pass status.
    */
   async submitQuiz(moduleId, answers) {
     try {

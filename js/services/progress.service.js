@@ -204,7 +204,8 @@ export default class ProgressService {
     
     if (maxPercent > currentPercent) {
       const timestamp = new Date().toISOString();
-      progress.modules[moduleId].chaptersRead[chapterId] = { percentScrolled: maxPercent, lastAccessed: timestamp };
+      const isCompleted = maxPercent >= 90;
+      progress.modules[moduleId].chaptersRead[chapterId] = { percentScrolled: maxPercent, lastAccessed: timestamp, completed: isCompleted };
       
       Store.set('userProgress', progress);
       
@@ -212,12 +213,17 @@ export default class ProgressService {
           modules: {
               [moduleId]: {
                   chaptersRead: {
-                      [chapterId]: { percentScrolled: maxPercent, lastAccessed: timestamp }
+                      [chapterId]: { percentScrolled: maxPercent, lastAccessed: timestamp, completed: isCompleted }
                   }
               }
           }
       };
       await this.queueWrite(`progress/${uid}`, payload);
+
+      if (isCompleted && currentPercent < 90) {
+          const profile = Store.get('profile') || {};
+          await this.markChapterRead(uid, profile.certificate || 'A', moduleId, chapterId);
+      }
     }
   }
 
@@ -232,7 +238,7 @@ export default class ProgressService {
         
         let completedCount = 0;
         Object.keys(modProgress).forEach(key => {
-            if (modProgress[key].percentScrolled >= 100) completedCount++;
+            if (modProgress[key].percentScrolled >= 90 || modProgress[key].completed) completedCount++;
         });
 
         const overallPercent = Math.round((completedCount / totalChapters) * 100);

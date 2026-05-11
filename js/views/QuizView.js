@@ -7,9 +7,11 @@ import Router from '../core/router.js';
 export default class QuizView extends AbstractView {
   constructor(params) {
     super(params);
-    const queryParams = this.params?.queryParams || Object.fromEntries(new URLSearchParams(window.location.search));
-    this.moduleId = queryParams.module || null;
-    this.chapterId = queryParams.chapter || null;
+    
+    const query = params?.queryParams || {};
+    
+    this.moduleId = query.module;
+    this.chapterId = query.chapter;
 
     this.state = {
         questions: [],
@@ -32,212 +34,230 @@ export default class QuizView extends AbstractView {
   async getHtml() {
     return `
       <style>
+        /* ==========================================================================
+           CLEAN & RESPONSIVE ASSESSMENT HUD (APPLE HIG)
+           ========================================================================== */
         :root {
-            --bg-base: #020617;
-            --bg-surface: #0F172A;
-            --bg-elevated: #1E293B;
-            --bg-hover: #334155;
-            --text-main: #F8FAFC;
-            --text-muted: #94A3B8;
-            --accent-primary: #3B82F6;
-            --accent-success: #10B981;
-            --accent-warning: #F59E0B;
-            --accent-danger: #EF4444;
-            --border-color: #334155;
+            --bg-base: #000000;
+            --bg-elevated: #151517;
+            --bg-hover: #1C1C1E;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-blue: #0A84FF;
+            --accent-green: #30D158;
+            --accent-orange: #FF9F0A;
+            --accent-red: #FF453A;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --radius-lg: 24px;
+            --radius-md: 16px;
         }
 
-        .quiz-layout {
-            display: flex; height: calc(100vh - 4.5rem); background: var(--bg-surface); color: var(--text-main);
-            font-family: 'Inter', system-ui, sans-serif; overflow: hidden;
-            box-sizing: border-box !important;
-            padding-top: 8rem !important;
-            min-height: 100dvh !important;
+        .quiz-viewport {
+            min-height: 100dvh;
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            
+            /* STRICT MOBILE SAFE ZONES */
+            padding: 8rem 1.5rem 6.5rem 1.5rem !important;
+            box-sizing: border-box;
+            
+            display: flex;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .question-area {
-            flex: 1; display: flex; flex-direction: column; overflow-y: auto;
-            padding: 3rem; position: relative; scroll-behavior: smooth;
+        .question-panel {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         .exam-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px dashed var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem;
-            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-glass); 
+            padding-bottom: 1.5rem; margin-bottom: 2rem;
         }
-        .exam-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--accent-warning); margin: 0; }
+        .exam-title { font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 800; letter-spacing: -0.02em; margin: 0; }
         
         .timer-badge {
-            background: var(--bg-elevated); border: 1px solid var(--border-color); padding: 0.5rem 1.25rem;
-            border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 1.25rem;
-            font-weight: 700; color: var(--accent-success); display: flex; align-items: center; gap: 8px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); transition: 0.3s;
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.2);
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-family: "JetBrains Mono", monospace; font-size: 1.1rem; font-weight: 700;
+            color: var(--accent-green); display: flex; align-items: center; gap: 8px;
+            transition: 0.3s;
         }
-        .timer-badge.warning { color: var(--accent-danger); animation: pulseTimer 1s infinite; border-color: rgba(239,68,68,0.5); box-shadow: inset 0 0 10px rgba(239,68,68,0.2); }
+        .timer-badge.warning { 
+            color: var(--accent-red); background: rgba(255, 69, 58, 0.1);
+            border-color: rgba(255, 69, 58, 0.3); animation: pulseTimer 1s infinite; 
+        }
         @keyframes pulseTimer { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* FEATURE 4: Floating Chapter Transition Animations */
+        /* Floating Chapter Transition Animations */
         #questionContainer {
             flex: 1; display: flex; flex-direction: column;
-            transition: opacity 0.4s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        #questionContainer.float-out {
-            opacity: 0; transform: translateY(-15px) scale(0.98);
-        }
-        #questionContainer.float-in {
-            opacity: 0; transform: translateY(15px) scale(0.98);
+            transition: opacity 0.3s ease-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .question-category { color: #8B5CF6; font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 0.5rem; text-transform: uppercase; }
-        .question-text { font-size: 1.35rem; line-height: 1.6; margin-bottom: 2rem; font-weight: 500; font-family: 'Poppins', sans-serif; color: white; }
+        .question-meta {
+            color: var(--text-muted); font-weight: 700; margin-bottom: 1.5rem;
+            letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .q-counter { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border-glass); color: var(--text-main); }
+        .question-category { color: var(--accent-blue); }
 
+        .question-text { font-size: clamp(1.2rem, 3vw, 1.5rem); line-height: 1.5; margin-bottom: 2rem; font-weight: 600; letter-spacing: -0.01em; }
+
+        /* TOUCH-FRIENDLY OPTIONS */
         .options-grid { display: flex; flex-direction: column; gap: 1rem; }
         .option-card {
-            background: var(--bg-elevated); border: 2px solid var(--border-color); border-radius: 12px;
-            padding: 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 1rem;
-            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.03); border: 2px solid transparent; border-radius: var(--radius-md);
+            padding: 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 1.25rem;
+            transition: 0.2s; font-size: 1.1rem; line-height: 1.4;
         }
-        .option-card:hover { border-color: #475569; background: var(--bg-hover); transform: translateX(5px); }
-        .option-card.selected { border-color: var(--accent-primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 4px 15px rgba(59,130,246,0.2); }
+        .option-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .option-card:active { transform: scale(0.98); }
+        .option-card.selected { border-color: var(--accent-blue); background: rgba(10, 132, 255, 0.1); }
         
         .option-letter {
-            width: 32px; height: 32px; border-radius: 8px; background: var(--bg-base);
-            display: flex; align-items: center; justify-content: center; font-weight: 700;
-            color: var(--text-muted); border: 1px solid var(--border-color); transition: 0.2s;
+            width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-muted); transition: 0.2s;
         }
-        .option-card.selected .option-letter { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
+        .option-card.selected .option-letter { background: var(--accent-blue); color: white; }
 
-        .controls-row {
-            margin-top: auto; padding-top: 2rem; display: flex; justify-content: space-between; flex-shrink: 0;
-        }
+        .controls-row { margin-top: 3rem; display: flex; justify-content: space-between; }
         .btn-nav {
-            padding: 0.8rem 1.75rem; border-radius: 8px; font-weight: 700; cursor: pointer;
-            border: none; background: var(--bg-elevated); color: white; transition: 0.2s;
-            display: inline-flex; align-items: center; gap: 8px; font-size: 1rem;
-            border: 1px solid var(--border-color);
+            padding: 1rem 2rem; border-radius: 50px; font-weight: 700; cursor: pointer; border: none;
+            background: rgba(255,255,255,0.08); color: var(--text-main); transition: 0.2s; font-size: 0.95rem;
         }
-        .btn-nav:hover:not(:disabled) { background: var(--bg-hover); border-color: #475569; }
-        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-nav:hover:not(:disabled) { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
-        .sidebar-area {
-            width: 340px; background: var(--bg-base); border-left: 1px solid var(--border-color);
-            display: flex; flex-direction: column; flex-shrink: 0; box-shadow: -10px 0 30px rgba(0,0,0,0.2); z-index: 10;
+        /* SIDEBAR PANEL */
+        .sidebar-panel {
+            width: 320px; background: var(--bg-elevated); border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg); display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); }
-        .sidebar-header h3 { margin: 0; color: white; font-family: 'Poppins', sans-serif; font-size: 1.1rem; }
+        .sidebar-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-glass); }
+        .sidebar-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
 
         .grid-container {
-            padding: 1.5rem; display: grid; grid-template-columns: repeat(4, 1fr);
+            padding: 2rem; display: grid; grid-template-columns: repeat(4, 1fr);
             gap: 12px; overflow-y: auto; flex: 1; align-content: start;
         }
         .grid-node {
-            aspect-ratio: 1; border-radius: 8px; background: var(--bg-elevated); border: 1px solid var(--border-color);
+            aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.05);
             display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;
-            cursor: pointer; color: var(--text-muted); transition: 0.2s;
+            cursor: pointer; color: var(--text-muted); transition: 0.2s; border: 2px solid transparent;
         }
-        .grid-node:hover { border-color: var(--text-muted); color: var(--text-main); transform: scale(1.05); }
-        .grid-node.answered { background: rgba(16, 185, 129, 0.1); border-color: var(--accent-success); color: var(--accent-success); }
-        .grid-node.active { border-width: 2px; border-color: var(--accent-warning); color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+        .grid-node:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .grid-node.answered { background: rgba(48, 209, 88, 0.15); color: var(--accent-green); }
+        .grid-node.active { border-color: var(--accent-blue); color: var(--text-main); transform: scale(1.1); box-shadow: 0 5px 15px rgba(10, 132, 255, 0.3); }
 
-        .submit-area { padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-surface); }
+        .submit-area { padding: 1.5rem 2rem; border-top: 1px solid var(--border-glass); }
         .btn-submit {
-            width: 100%; padding: 1.2rem; border-radius: 12px; border: none; font-weight: 800;
-            font-size: 1.1rem; color: white; background: linear-gradient(135deg, #138808 0%, #0D6606 100%);
-            cursor: pointer; box-shadow: 0 4px 15px rgba(19, 136, 8, 0.3); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 800;
+            font-size: 1.05rem; color: #000; background: var(--accent-green); cursor: pointer; 
+            transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn-submit:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(19, 136, 8, 0.5); }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(48, 209, 88, 0.3); }
+        .btn-submit:active { transform: scale(0.96); }
 
+        /* MODALS & TOASTS */
         .confirm-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             z-index: 99999; display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: 0.3s ease;
         }
         .confirm-modal-overlay.active { opacity: 1; pointer-events: all; }
         
         .confirm-modal-card {
-            background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px;
-            padding: 2.5rem; max-width: 420px; width: 90%; text-align: center;
-            transform: translateY(20px) scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            background: #1C1C1E; border: 1px solid var(--border-glass); border-radius: var(--radius-lg);
+            padding: 2.5rem; max-width: 400px; width: 90%; text-align: center;
+            transform: scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
-        .confirm-modal-overlay.active .confirm-modal-card { transform: translateY(0) scale(1); }
+        .confirm-modal-overlay.active .confirm-modal-card { transform: scale(1); }
         
-        .modal-title { color: white; font-family: 'Poppins', sans-serif; font-size: 1.6rem; margin-bottom: 0.5rem; }
+        .modal-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
         .modal-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 12px; }
-        .modal-btn { flex: 1; padding: 1rem; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; font-size: 1rem; }
-        .modal-btn-cancel { background: transparent; border: 2px solid var(--border-color); color: white; }
-        .modal-btn-cancel:hover { background: var(--bg-elevated); border-color: #475569; }
-        .modal-btn-confirm { background: linear-gradient(135deg, var(--accent-success) 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .modal-btn-confirm:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 12px; }
+        .modal-btn { padding: 1.1rem; border-radius: 50px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .modal-btn-cancel { background: rgba(255,255,255,0.08); color: var(--text-main); }
+        .modal-btn-cancel:hover { background: rgba(255,255,255,0.15); }
+        .modal-btn-confirm { background: var(--accent-green); color: #000; box-shadow: 0 4px 15px rgba(48, 209, 88, 0.2); }
+        .modal-btn-confirm:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(48, 209, 88, 0.4); }
 
         .error-container { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; }
-        .error-container h2 { color:var(--accent-danger); margin-bottom:1rem; }
+        .error-container h2 { color:var(--accent-red); margin-bottom:1rem; font-size: 1.8rem; font-weight: 800; }
 
         .recovery-toast {
-            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-primary); color: white; padding: 0.75rem 1.5rem; border-radius: 50px;
-            font-size: 0.9rem; font-weight: bold; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-            z-index: 1000; animation: dropIn 0.5s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.5s 4s forwards;
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--text-main); color: #000; padding: 0.75rem 1.5rem; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 800; box-shadow: 0 10px 30px rgba(255,255,255,0.2);
+            z-index: 1000; animation: dropIn 0.5s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.5s 3s forwards;
             pointer-events: none;
         }
-        @keyframes dropIn { from { top: 0px; opacity: 0; } to { top: 80px; opacity: 1; } }
+        @keyframes dropIn { from { top: 0px; opacity: 0; } to { top: 100px; opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; } }
 
+        /* ==========================================================================
+           MOBILE RESPONSIVENESS OVERRIDES
+           ========================================================================== */
         @media (max-width: 768px) {
-            .quiz-layout { flex-direction: column; }
-            .sidebar-area { width: 100%; height: 220px; border-left: none; border-top: 1px solid var(--border-color); }
-            .question-area { padding: 1.5rem; }
+            .quiz-viewport { flex-direction: column; padding-top: 6.5rem !important; gap: 1rem; }
+            .question-panel { padding: 1.5rem; border-radius: 20px; }
+            .sidebar-panel { width: 100%; border-radius: 20px; }
+            .grid-container { grid-template-columns: repeat(6, 1fr); padding: 1.5rem; }
+            .submit-area { padding: 1.5rem; }
             .exam-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .grid-container { grid-template-columns: repeat(6, 1fr); }
+            .timer-badge { width: 100%; justify-content: center; box-sizing: border-box; }
+            .controls-row { flex-direction: column; gap: 1rem; }
+            .btn-nav { width: 100%; text-align: center; }
         }
         
         /* View-Specific Skeleton */
-        .quiz-skeleton-layout { display: flex; height: calc(100vh - 4.5rem); background: var(--bg-surface); box-sizing: border-box !important; padding-top: 8rem !important; min-height: 100dvh !important; }
-        .sk-q-area { flex: 1; padding: 3rem; display: flex; flex-direction: column; }
-        .sk-header-row { display: flex; justify-content: space-between; border-bottom: 2px dashed var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-        .sk-title { height: 30px; width: 250px; border-radius: 8px; }
-        .sk-timer { height: 40px; width: 120px; border-radius: 12px; }
-        .sk-q-tag { height: 24px; width: 180px; border-radius: 6px; margin-bottom: 1.5rem; }
-        .sk-q-text { height: 80px; width: 100%; border-radius: 12px; margin-bottom: 2rem; }
-        .sk-opt { height: 70px; width: 100%; border-radius: 12px; margin-bottom: 1rem; }
-        .sk-controls { margin-top: auto; padding-top: 2rem; display: flex; justify-content: space-between; }
-        .sk-nav-btn { height: 50px; width: 140px; border-radius: 8px; }
-        .sk-sidebar { width: 340px; background: var(--bg-base); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; }
-        .sk-sb-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); height: 75px; }
-        .sk-sb-grid { padding: 1.5rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .sk-node { aspect-ratio: 1; border-radius: 8px; }
-        .sk-sb-footer { margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--border-color); }
-        .sk-submit-btn { height: 60px; width: 100%; border-radius: 12px; }
+        .sk-header-row { display: flex; justify-content: space-between; padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glass); }
+        .sk-title { height: 30px; width: 200px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+        .sk-timer { height: 40px; width: 100px; border-radius: 50px; background: rgba(255,255,255,0.05); }
+        .sk-q-tag { height: 24px; width: 140px; border-radius: 50px; margin-bottom: 1.5rem; background: rgba(255,255,255,0.05); }
+        .sk-q-text { height: 80px; width: 100%; border-radius: 12px; margin-bottom: 2rem; background: rgba(255,255,255,0.05); }
+        .sk-opt { height: 75px; width: 100%; border-radius: 16px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .sk-sb-grid { padding: 2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .sk-node { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.05); }
         
+        @keyframes pulse-skel { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .sk-anim { animation: pulse-skel 1.5s infinite; }
+
         .hidden-layer { display: none !important; opacity: 0; }
         .visible-layer { display: flex !important; animation: fadeIn 0.4s ease-out forwards; }
-        
-        @media (max-width: 768px) {
-            .quiz-skeleton-layout { flex-direction: column; }
-            .sk-sidebar { width: 100%; height: 220px; border-left: none; border-top: 1px solid var(--border-color); }
-            .sk-sb-grid { grid-template-columns: repeat(6, 1fr); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       </style>
 
-      <!-- SKELETON LAYER -->
-      <div class="quiz-skeleton-layout" id="quizSkeletonLayer">
-          <div class="sk-q-area">
-              <div class="sk-header-row"><div class="sk-title skeleton"></div><div class="sk-timer skeleton"></div></div>
-              <div class="sk-q-tag skeleton"></div><div class="sk-q-text skeleton"></div>
-              <div class="sk-opt skeleton"></div><div class="sk-opt skeleton"></div><div class="sk-opt skeleton"></div><div class="sk-opt skeleton"></div>
-              <div class="sk-controls"><div class="sk-nav-btn skeleton"></div><div class="sk-nav-btn skeleton"></div></div>
+      <div class="quiz-viewport" id="quizSkeletonLayer">
+          <div class="question-panel">
+              <div class="sk-header-row sk-anim"><div class="sk-title"></div><div class="sk-timer"></div></div>
+              <div class="sk-q-tag sk-anim"></div><div class="sk-q-text sk-anim"></div>
+              <div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div>
           </div>
-          <div class="sk-sidebar">
-              <div class="sk-sb-header"><div class="skeleton" style="height: 24px; width: 180px; border-radius: 6px;"></div></div>
-              <div class="sk-sb-grid">${'<div class="sk-node skeleton"></div>'.repeat(16)}</div>
-              <div class="sk-sb-footer"><div class="sk-submit-btn skeleton"></div></div>
+          <div class="sidebar-panel">
+              <div class="sidebar-header"><div class="sk-title sk-anim" style="height: 20px;"></div></div>
+              <div class="sk-sb-grid">${'<div class="sk-node sk-anim"></div>'.repeat(16)}</div>
           </div>
       </div>
 
-      <!-- DATA LAYER -->
-      <div class="quiz-layout hidden-layer" id="quizLayoutContainer"></div>
+      <div class="quiz-viewport hidden-layer" id="quizLayoutContainer"></div>
     `;
   }
 
@@ -300,7 +320,7 @@ export default class QuizView extends AbstractView {
                 data.classList.remove('hidden-layer');
                 data.classList.add('visible-layer');
             }
-        }, 1500);
+        }, 1000);
 
         document.getElementById('btnPrevQ').onclick = () => this.navigateQuestion(-1);
         document.getElementById('btnNextQ').onclick = () => this.navigateQuestion(1);
@@ -363,15 +383,15 @@ export default class QuizView extends AbstractView {
   }
 
   renderMainUI(title, isRecovered) {
-      let recoveryHtml = isRecovered ? `<div class="recovery-toast">🔄 Session Recovered</div>` : '';
+      let recoveryHtml = isRecovered ? `<div class="recovery-toast">Session Recovered</div>` : '';
 
       document.getElementById('quizLayoutContainer').innerHTML = `
         ${recoveryHtml}
-        <div class="question-area">
+        <div class="question-panel">
             <div class="exam-header">
-                <h2 class="exam-title" id="quizTitle">${title} - Quiz</h2>
+                <h2 class="exam-title" id="quizTitle">${title}</h2>
                 <div class="timer-badge" id="examTimer">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <span>--:--</span>
                 </div>
             </div>
@@ -382,22 +402,22 @@ export default class QuizView extends AbstractView {
             </div>
         </div>
         
-        <div class="sidebar-area">
+        <div class="sidebar-panel">
             <div class="sidebar-header"><h3>Question Navigator</h3></div>
             <div class="grid-container" id="navGrid"></div>
             <div class="submit-area">
-                <button class="btn-submit" id="btnSubmitExam">SUBMIT EXAM</button>
+                <button class="btn-submit" id="btnSubmitExam">Submit Exam</button>
             </div>
         </div>
 
         <div class="confirm-modal-overlay" id="submitModalOverlay">
             <div class="confirm-modal-card">
-                <div style="font-size:4rem; margin-bottom:1rem;" id="modalIcon">📝</div>
+                <div style="font-size:3rem; margin-bottom:1rem;" id="modalIcon">📝</div>
                 <h3 class="modal-title">Finish Assessment?</h3>
                 <p class="modal-desc" id="submitModalDesc">You are about to submit your exam. Are you sure?</p>
                 <div class="modal-actions">
-                    <button class="modal-btn modal-btn-cancel" id="btnCancelSubmit">Review Answers</button>
                     <button class="modal-btn modal-btn-confirm" id="btnConfirmSubmit">Yes, Grade It</button>
+                    <button class="modal-btn modal-btn-cancel" id="btnCancelSubmit">Return to Exam</button>
                 </div>
             </div>
         </div>
@@ -413,10 +433,12 @@ export default class QuizView extends AbstractView {
       container.classList.add('visible-layer');
       
       container.innerHTML = `
-          <div class="error-container">
-            <h2>Assessment Unavailable</h2>
-            <p>${msg}</p>
-            <button onclick="window.history.back()" style="padding:1rem 2rem; background:var(--bg-elevated); color:white; border:1px solid var(--border-color); border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Return to Module</button>
+          <div class="question-panel" style="width: 100%;">
+            <div class="error-container">
+              <h2>Assessment Unavailable</h2>
+              <p style="color: var(--text-muted); margin-bottom: 2rem;">${msg}</p>
+              <button onclick="window.history.back()" class="btn-nav" style="background: rgba(255,255,255,0.1);">Return to Module</button>
+            </div>
           </div>
       `;
   }
@@ -473,17 +495,14 @@ export default class QuizView extends AbstractView {
     this.renderQuestion(index, dir);
   }
 
-  // --- FEATURE 4: FLOATING CHAPTER ANIMATION ---
   renderQuestion(index, animationDir) {
     const container = document.getElementById('questionContainer');
     
-    // Step 1: Trigger exit animation
     if (animationDir !== 'initial') {
         container.style.opacity = '0';
-        container.style.transform = animationDir === 'next' ? 'translateY(-20px)' : 'translateY(20px)';
+        container.style.transform = animationDir === 'next' ? 'translateY(-15px)' : 'translateY(15px)';
     }
 
-    // Step 2: Wait for CSS transition (150ms), swap DOM, then animate in
     setTimeout(() => {
         this.state.currentQIndex = index;
         this.persistState();
@@ -500,23 +519,21 @@ export default class QuizView extends AbstractView {
             `;
         }).join('');
 
-        const categoryHtml = q.category ? `<div class="question-category">${q.category}</div>` : '';
+        const categoryHtml = q.category ? `<span class="question-category">${q.category}</span>` : '';
 
         container.innerHTML = `
-            <div style="color:var(--text-muted); font-weight:700; margin-bottom:1.5rem; letter-spacing:1px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
-                <span style="background:var(--bg-elevated); padding:6px 12px; border-radius:6px; border:1px solid var(--border-color);">QUESTION ${index + 1} OF ${this.state.questions.length}</span>
+            <div class="question-meta">
+                <span class="q-counter">Question ${index + 1} of ${this.state.questions.length}</span>
+                ${categoryHtml}
             </div>
-            ${categoryHtml}
             <div class="question-text">${q.text}</div>
             <div class="options-grid">${optionsHtml}</div>
         `;
 
-        // Rebind click listeners
         container.querySelectorAll('.option-card').forEach(card => {
             card.onclick = () => {
                 this.state.answers[index] = parseInt(card.dataset.index);
                 this.persistState(); 
-                // Quick re-render without the long slide animation for immediate selection feedback
                 this.renderQuestion(index, 'initial'); 
                 this.renderGrid(); 
             };
@@ -529,16 +546,14 @@ export default class QuizView extends AbstractView {
         const activeNode = document.getElementById(`node-${index}`);
         if(activeNode) activeNode.classList.add('active');
 
-        // Step 3: Trigger entrance float animation
         if (animationDir !== 'initial') {
-            container.style.transform = animationDir === 'next' ? 'translateY(20px)' : 'translateY(-20px)';
-            // Small reflow delay
+            container.style.transform = animationDir === 'next' ? 'translateY(15px)' : 'translateY(-15px)';
             requestAnimationFrame(() => {
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0)';
             });
         }
-    }, animationDir === 'initial' ? 0 : 150); // Fast exit, smooth entrance
+    }, animationDir === 'initial' ? 0 : 150); 
   }
 
   renderGrid() {
@@ -573,10 +588,10 @@ export default class QuizView extends AbstractView {
       
       if (answeredCount < totalCount) {
           modalIcon.innerHTML = '⚠️';
-          modalDesc.innerHTML = `You have only answered <strong style="color:var(--accent-danger);">${answeredCount} out of ${totalCount}</strong> questions.<br><br>Unanswered questions will automatically be marked incorrect. Are you sure you want to proceed?`;
+          modalDesc.innerHTML = `You have only answered <strong style="color:var(--accent-red);">${answeredCount} out of ${totalCount}</strong> questions.<br><br>Unanswered questions will automatically be marked incorrect. Proceed?`;
       } else {
           modalIcon.innerHTML = '✅';
-          modalDesc.innerHTML = `You have answered all <strong style="color:var(--accent-success);">${totalCount}</strong> questions.<br><br>Are you ready to lock in your final score?`;
+          modalDesc.innerHTML = `You have answered all <strong style="color:var(--accent-green);">${totalCount}</strong> questions.<br><br>Are you ready to lock in your final score?`;
       }
       
       document.getElementById('submitModalOverlay').classList.add('active');
@@ -591,7 +606,7 @@ export default class QuizView extends AbstractView {
     const cancelBtn = document.getElementById('btnCancelSubmit');
     
     confirmBtn.disabled = true;
-    confirmBtn.innerHTML = `Grading... <div style="display:inline-block; width:14px; height:14px; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:8px; vertical-align:middle;"></div>`;
+    confirmBtn.innerHTML = `Grading... <div style="display:inline-block; width:14px; height:14px; border:2px solid #000; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:8px; vertical-align:middle;"></div>`;
     cancelBtn.style.opacity = '0.5';
     cancelBtn.style.pointerEvents = 'none';
 
@@ -610,7 +625,6 @@ export default class QuizView extends AbstractView {
             }
         });
 
-        // Merge newly failed questions into the global Failed Bank for future Retries
         const oldBankStr = localStorage.getItem(this.failedBankKey);
         let globalFailedBank = oldBankStr ? JSON.parse(oldBankStr) : [];
         let updatedBank = [...new Set([...globalFailedBank, ...newlyFailedTexts])];
@@ -653,4 +667,4 @@ export default class QuizView extends AbstractView {
         cancelBtn.style.pointerEvents = 'all';
     }
   }
-}
+}   
