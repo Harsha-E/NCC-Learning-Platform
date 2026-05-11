@@ -307,7 +307,7 @@ pre {
     }
 
     /* Stack flex containers that are side-by-side on desktop */
-    .hero-header, .hero-split, .nav-actions, .stat-row {
+    .hero-header, .hero-split, .stat-row {
         flex-direction: column !important;
         align-items: flex-start !important;
         width: 100% !important;

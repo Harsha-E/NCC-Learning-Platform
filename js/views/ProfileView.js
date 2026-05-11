@@ -57,7 +57,7 @@ export default class ProfileView extends AbstractView {
         .form-label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
         
         .form-input { 
-          width: 100%; padding: 1rem 1.2rem; 
+          width: 70%; max-width: 85%; padding: 1rem 1.2rem; 
           background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); 
           border-radius: 12px; font-size: 1rem; color: var(--text-pure); 
           transition: all 0.3s ease; box-sizing: border-box; font-family: inherit;
@@ -67,7 +67,7 @@ export default class ProfileView extends AbstractView {
         
         .form-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
           gap: 1.5rem;
         }
         
@@ -102,6 +102,7 @@ export default class ProfileView extends AbstractView {
             .profile-card { padding: 1.5rem; border-radius: 16px; }
             .profile-skeleton { padding: 1.5rem; border-radius: 16px; }
             .profile-viewport { padding-top: 6rem; padding-bottom: 6rem; }
+            .form-grid { grid-template-columns: 1fr; }
         }
       </style>
 

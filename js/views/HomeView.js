@@ -34,7 +34,7 @@ export default class HomeView extends AbstractView {
             inset: 0; /* top: 0, right: 0, bottom: 0, left: 0 */
             width: 100vw; 
             height: 100dvh;
-            background-color: var(--bg-deep); color: var(--text-pure);
+            background-color: #000000 !important; color: var(--text-pure);
             font-family: "SF Pro Display", "Inter", sans-serif;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden; /* STRICTLY KILLS SCROLLBARS */
@@ -55,8 +55,11 @@ export default class HomeView extends AbstractView {
             position: absolute; font-size: clamp(3rem, 5vw, 6rem); font-weight: 300;
             letter-spacing: -0.02em; text-align: center; opacity: 0; transform: scale(0.95) translateY(20px);
             transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-            background: linear-gradient(180deg, #FFF 0%, rgba(255,255,255,0.4) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background: linear-gradient(180deg, #FFF 0%, rgba(255,255,255,0.4) 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+            color: transparent !important;
             margin: 0; padding: 0 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .story-text.active { opacity: 1; transform: scale(1) translateY(0); }

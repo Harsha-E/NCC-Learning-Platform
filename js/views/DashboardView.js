@@ -45,7 +45,7 @@ export default class DashboardView extends AbstractView {
 
         .hero-header { margin-bottom: 3rem; animation: fadeInDown 0.6s ease-out; }
         .hero-header h1 { 
-            font-size: clamp(2.2rem, 5vw, 3rem); /* Fluid text scaling */
+            font-size: clamp(2.2rem, 5vw, 3rem);
             font-weight: 800; letter-spacing: -0.03em; margin: 0; line-height: 1.1; 
         }
         .hero-header p { color: var(--text-muted); font-size: 1.1rem; margin-top: 0.75rem; }
@@ -85,6 +85,7 @@ export default class DashboardView extends AbstractView {
             padding: 2.5rem; display: flex; justify-content: space-between; align-items: center;
             backdrop-filter: blur(20px);
             animation: fadeInDown 0.6s ease-out backwards; animation-delay: 0.3s;
+            margin-bottom: 1.5rem; /* Space between banner and mock card */
         }
         
         .action-banner-text h2 { margin: 0 0 0.5rem 0; font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; letter-spacing: -0.01em; }
@@ -104,6 +105,28 @@ export default class DashboardView extends AbstractView {
         .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid rgba(255,255,255,0.15); }
         .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
+        /* AWWWARDS-STYLE FINAL SIMULATION CARD */
+        .premium-mock-card {
+            padding: 2.5rem; background: linear-gradient(145deg, #0F172A 0%, #020617 100%);
+            border: 1px solid var(--border-glass); border-radius: var(--radius-xl);
+            display: flex; justify-content: space-between; align-items: center;
+            position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeInDown 0.6s ease-out backwards; animation-delay: 0.4s;
+        }
+        .premium-mock-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+        }
+        .pmc-badge { color: var(--accent-green); font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; display: block; }
+        .pmc-title { color: #FFF; font-size: clamp(1.6rem, 4vw, 2rem); font-weight: 800; margin: 0 0 0.5rem 0; letter-spacing: -0.02em; }
+        .pmc-desc { color: var(--text-muted); font-size: 1rem; margin: 0; line-height: 1.5; }
+        .pmc-btn {
+            background: var(--text-main); color: var(--bg-base); padding: 1.2rem 2.5rem; border-radius: 50px;
+            font-weight: 800; font-size: 1rem; text-decoration: none; transition: 0.3s;
+            display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; border: none;
+        }
+        .pmc-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); background: #EBEBF5; }
+
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.97) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         
@@ -117,12 +140,12 @@ export default class DashboardView extends AbstractView {
             .metric-icon { width: 42px; height: 42px; margin-bottom: 1rem; }
             .metric-icon svg { width: 20px; height: 20px; }
             
-            /* Action Banner stacks vertically for mobile reading comfort */
             .action-banner { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.75rem; border-radius: 20px; }
-            
-            /* Buttons stretch to full width for easy thumb-tapping */
             .action-buttons { width: 100%; flex-direction: column; gap: 0.75rem; }
             .btn-launch { width: 100%; padding: 1.1rem; }
+
+            .premium-mock-card { flex-direction: column; align-items: flex-start; gap: 2rem; padding: 1.75rem; border-radius: 20px; }
+            .pmc-btn { width: 100%; justify-content: center; box-sizing: border-box; }
         }
       </style>
 
@@ -141,7 +164,7 @@ export default class DashboardView extends AbstractView {
   async mount() {
       const user = Store.get('user');
       const profile = Store.get('profile') || {};
-      if (!user) return Router.navigateTo('./login');
+      if (!user) return Router.navigateTo('/login');
 
       const cert = profile.certificate || 'A';
       const wing = profile.wing || 'army';
@@ -232,9 +255,21 @@ export default class DashboardView extends AbstractView {
                   <p>Resume your active curriculum or execute pending assessments.</p>
               </div>
               <div class="action-buttons">
-                  <a href="./learning" class="btn-launch btn-ghost" data-nav>Learning Matrix</a>
-                  <a href="./quizzes" class="btn-launch btn-primary" data-nav>Assessments</a>
+                  <a href="/learning" class="btn-launch btn-ghost" data-nav>Learning Matrix</a>
+                  <a href="/quizzes" class="btn-launch btn-primary" data-nav>Assessments</a>
               </div>
+          </div>
+
+          <div class="premium-mock-card">
+              <div class="pmc-content">
+                  <span class="pmc-badge">Deployment Authorized</span>
+                  <h2 class="pmc-title">Final Simulation</h2>
+                  <p class="pmc-desc">Initiate the ultimate parametric exam. Full curriculum traversal enforced.</p>
+              </div>
+              <a href="/mock-test" class="pmc-btn" data-nav>
+                  Launch Sequence
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
           </div>
       `;
 
@@ -242,7 +277,6 @@ export default class DashboardView extends AbstractView {
       this.animateNumber('animProg', this.stats.globalProgress, '%');
       this.animateNumber('animScore', this.stats.avgScore, '%');
 
-      // Rebind routing for SPA navigation
       window.Router = Router;
       document.querySelectorAll('[data-nav]').forEach(link => {
           link.onclick = (e) => {

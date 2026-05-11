@@ -24,19 +24,21 @@ const ROUTES = {
 };
 
 export default class Router {
-  static getBasePath() {
-    const baseElement = document.querySelector('base');
-    if (baseElement) {
-      const resolved = new URL(baseElement.href, window.location.href);
-      return resolved.pathname.replace(/\/$/, '') || '/';
-    }
-    return window.location.pathname.replace(/\/index(?:\.html)?$/, '').replace(/\/$/, '') || '/';
+
+  // Extracts the path from the hash (e.g., "#/dashboard?user=1" -> "/dashboard")
+  static getHashPath() {
+    let hash = window.location.hash.slice(1);
+    if (!hash) return '/';
+    const path = hash.split('?')[0]; 
+    return path || '/';
   }
 
-  static normalizeRoutePath(pathname) {
-    let path = pathname.replace(/\.html$/, '');
-    if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
-    return path || '/';
+  // Extracts query parameters from the hash (e.g., "#/quiz?module=1" -> { module: '1' })
+  static getHashQueryParams() {
+    let hash = window.location.hash.slice(1);
+    if (!hash || !hash.includes('?')) return {};
+    const queryString = hash.split('?')[1];
+    return Object.fromEntries(new URLSearchParams(queryString));
   }
 
   static MapsTo(path) {
@@ -46,18 +48,9 @@ export default class Router {
       if (routeKey === '/') continue;
       if (path === routeKey || path.endsWith(routeKey)) return routeKey;
     }
-    if (path === '/' || path.endsWith('/index') || path.endsWith('/index.html')) return '/';
     return null;
   }
 
-  static isSamePageHashLink(url) {
-    return url.pathname === window.location.pathname &&
-           url.search === window.location.search &&
-           url.hash && 
-           url.hash.length > 1;
-  }
-
-  // --- V15: PREMIUM TRANSITION ENGINE ---
   static async dropCurtain() {
     let curtain = document.getElementById('router-curtain');
     if (!curtain) {
@@ -88,80 +81,68 @@ export default class Router {
     }
   }
 
+  // Converts standard paths into hash paths and updates the URL
   static async navigateTo(destination) {
-    const url = new URL(destination, window.location.href);
-    if (url.origin !== window.location.origin) {
-      window.location.href = destination;
-      return;
-    }
-    if (this.isSamePageHashLink(url)) {
-      window.history.pushState(null, null, url.href);
-      this.scrollToHash(url.hash);
-      return;
-    }
+     let cleanDest = destination;
+     
+     // Strip out origin if absolute URL
+     if (cleanDest.startsWith(window.location.origin)) {
+         cleanDest = cleanDest.replace(window.location.origin, '');
+     }
+     
+     // Handle relative paths
+     if (cleanDest.startsWith('./')) cleanDest = cleanDest.substring(1);
+     if (!cleanDest.startsWith('/')) cleanDest = '/' + cleanDest;
+     
+     const newHash = '#' + cleanDest;
 
-    await this.dropCurtain();
-    window.history.pushState(null, null, url.href);
-    await this.navigate(true); 
+     if (window.location.hash === newHash) return; // Already there
+
+     await this.dropCurtain();
+     window.location.hash = newHash; // Triggers 'hashchange' event naturally
   }
 
   static async init() {
     if (window._routerInitialized) return;
     window._routerInitialized = true;
 
+    // Intercept all anchor clicks to route them through the hash system
     document.body.addEventListener('click', async e => {
       const link = e.target.closest('a');
       if (!link || link.hasAttribute('data-bypass') || link.target === '_blank' || link.rel === 'external') return;
 
       const href = link.getAttribute('href');
-      if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
-
-      const url = new URL(link.href, window.location.href);
-      if (url.origin !== window.location.origin) return;
-
-      if (this.isSamePageHashLink(url)) {
-        e.preventDefault();
-        window.history.pushState(null, null, url.href);
-        this.scrollToHash(url.hash);
-        return;
-      }
+      if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:') || href.startsWith('#')) return;
 
       e.preventDefault();
-      await this.navigateTo(link.href);
+      await this.navigateTo(href);
     });
 
-    window.addEventListener('popstate', async () => {
+    // Listen for manual URL changes or browser back/forward buttons
+    window.addEventListener('hashchange', async () => {
       await this.dropCurtain();
-      await this.navigate(true);
+      await this.navigate();
     });
     
-    await this.navigate(false);
+    // Boot sequence: If no hash exists, default to home
+    if (!window.location.hash || window.location.hash === '#') {
+        window.location.hash = '#/'; 
+    } else {
+        await this.navigate();
+    }
   }
 
-  static scrollToHash(hash) {
-    if (!hash) return;
-    try {
-      const target = document.querySelector(hash);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch (e) { console.warn("Invalid hash:", hash); }
-  }
-
-  static async navigate(isClientRouted = false) {
+  static async navigate() {
     const appRoot = document.getElementById('app-root');
-    const startTime = Date.now(); // START THE 1.5s SHIMMER TIMER
+    const startTime = Date.now(); 
 
-    // Prevent home-page ghosting on fresh load
     if (appRoot) {
       appRoot.style.opacity = '0';
       appRoot.style.transform = 'scale(0.98)';
-      appRoot.style.transition = 'none'; // Instant hide
+      appRoot.style.transition = 'none'; 
     }
 
-    const basePath = this.getBasePath(); 
-    const rawPath = this.normalizeRoutePath(window.location.pathname);
-    const path = basePath !== '/' && rawPath.startsWith(basePath) 
-      ? rawPath.slice(basePath.length) || '/' : rawPath;
-
+    const path = this.getHashPath();
     const routeKey = Router.MapsTo(path) || '/404';
     let route = ROUTES[routeKey] || ROUTES['/404'];
 
@@ -170,42 +151,34 @@ export default class Router {
     const user = authData?.user;
     const role = authData?.role;
 
-    const createSafeUrl = (target) => {
-      const fullPath = (basePath + target).replace(/\/+/g, '/');
-      return window.location.origin + (fullPath.startsWith('/') ? fullPath : '/' + fullPath);
-    };
-
+    // Security & Role Redirects
     if (route.rules.requireAuth && !user) {
-      window.history.replaceState(null, null, createSafeUrl('/'));
-      route = ROUTES['/'];
+      window.location.hash = '#/'; // Redirect to home/login if unauthorized
+      return; 
     } else if (route.rules.guestOnly && user) {
-      const targetRoute = (role === 'admin' || role === 'superadmin') ? '/admin/dashboard' : '/dashboard';
-      window.history.replaceState(null, null, createSafeUrl(targetRoute));
-      route = ROUTES[targetRoute];
+      const targetRoute = (role === 'admin' || role === 'superadmin') ? '#/admin/dashboard' : '#/dashboard';
+      window.location.hash = targetRoute;
+      return; 
     } else if (route.rules.role && route.rules.role !== role) {
-      window.history.replaceState(null, null, createSafeUrl('/404'));
-      route = ROUTES['/404'];
+      window.location.hash = '#/404';
+      return; 
     }
 
     try {
       const { default: ViewClass } = await route.view();
-      const queryParams = Object.fromEntries(new URLSearchParams(window.location.search));
+      const queryParams = this.getHashQueryParams();
       const view = new ViewClass({ queryParams, path, routeKey });
 
       if (window.currentView?.destroy) await window.currentView.destroy();
 
       if (appRoot) {
-        // Inject Skeleton/Base HTML immediately to show the shimmer
         appRoot.innerHTML = await view.getHtml();
         appRoot.style.opacity = '1';
 
-        // Background hydration
         if (view.mount) await view.mount(queryParams);
         
-        // Initialize the tactical navbar after the DOM has updated
         initNavbar(); 
         
-        // --- 1.5s PERCEPTION GUARD ---
         const elapsed = Date.now() - startTime;
         const delay = Math.max(0, 1500 - elapsed);
 
@@ -226,12 +199,7 @@ export default class Router {
       }
       
       window.currentView = view;
-      if (window.location.hash) {
-        setTimeout(() => this.scrollToHash(window.location.hash), 100); 
-      } else {
-        window.scrollTo(0, 0); 
-      }
-
+      window.scrollTo(0, 0); 
       window.dispatchEvent(new CustomEvent('route-changed'));
       
     } catch (err) {

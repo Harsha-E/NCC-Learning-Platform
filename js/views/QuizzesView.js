@@ -179,6 +179,46 @@ export default class QuizzesView extends AbstractView {
       }
 
       let html = '';
+      html += `
+          <style>
+              .elite-mock-banner {
+                  position: relative; margin-bottom: 3.5rem; padding: 1px;
+                  background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02), rgba(255,255,255,0.1));
+                  border-radius: 20px;
+              }
+              .emb-inner {
+                  background: #020617; border-radius: 19px; padding: 2rem 2.5rem;
+                  display: flex; justify-content: space-between; align-items: center;
+              }
+              .emb-tag { color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
+              .emb-title { color: #FFF; font-size: 1.7rem; font-weight: 800; margin: 0 0 0.5rem 0; letter-spacing: -0.01em; }
+              .emb-desc { color: #8E8E93; font-size: 0.95rem; margin: 0; }
+              .emb-action {
+                  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #FFF;
+                  padding: 1.1rem 2rem; border-radius: 50px; font-weight: 700; font-size: 0.95rem; text-decoration: none;
+                  transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+              }
+              .emb-action:hover { background: #FFF; color: #000; box-shadow: 0 10px 25px rgba(255,255,255,0.15); transform: translateY(-2px); }
+              @media (max-width: 768px) {
+                  .emb-inner { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.5rem; }
+                  .emb-action { width: 100%; justify-content: center; box-sizing: border-box; }
+              }
+          </style>
+
+          <div class="elite-mock-banner">
+              <div class="emb-inner">
+                  <div class="emb-text">
+                      <span class="emb-tag">Strict Mode Active</span>
+                      <h2 class="emb-title">Parametric Mock Exam</h2>
+                      <p class="emb-desc">Global weightage applied. Blueprint constraints enforced.</p>
+                  </div>
+                  <a href="/mock-test" class="emb-action" data-nav>
+                      Initialize
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </a>
+              </div>
+          </div>
+      `;
       this.quizzes.forEach(quiz => {
           const modProgress = this.progress.modules?.[quiz.moduleId]?.quizzes?.[quiz.chapterId];
           const bestScore = modProgress?.highestScore || (modProgress?.score !== undefined ? modProgress : null);
