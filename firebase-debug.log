@@ -1,0 +1,35 @@
+[debug] [2026-05-05T09:31:51.000Z] ----------------------------------------------------------------------
+[debug] [2026-05-05T09:31:51.002Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Dell\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2026-05-05T09:31:51.002Z] CLI Version:   15.16.0
+[debug] [2026-05-05T09:31:51.002Z] Platform:      win32
+[debug] [2026-05-05T09:31:51.002Z] Node Version:  v24.15.0
+[debug] [2026-05-05T09:31:51.003Z] Time:          Tue May 05 2026 15:01:51 GMT+0530 (India Standard Time)
+[debug] [2026-05-05T09:31:51.003Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-05T09:31:52.203Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-05T09:31:52.203Z] > authorizing via signed-in user (signingyour77@gmail.com)
+[debug] [2026-05-05T09:31:52.203Z] [iam] checking project ncc-1945 for permissions ["firebase.projects.get"]
+[debug] [2026-05-05T09:31:52.204Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:52.204Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:52.206Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945:testIamPermissions [none]
+[debug] [2026-05-05T09:31:52.206Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945:testIamPermissions  x-goog-user-project=ncc-1945
+[debug] [2026-05-05T09:31:52.207Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-05-05T09:31:53.499Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945:testIamPermissions 200
+[debug] [2026-05-05T09:31:53.500Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-05-05T09:31:53.501Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:53.501Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:53.501Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945 [none]
+[debug] [2026-05-05T09:31:53.796Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945 200
+[debug] [2026-05-05T09:31:53.796Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/ncc-1945 {"projectNumber":"581810935602","projectId":"ncc-1945","lifecycleState":"ACTIVE","name":"NCC-1945","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-04-29T18:00:24.749Z"}
+[info] 
+[info] === Serving from 'D:\Harsha\WebDev\NCC\NCC-v3'...
+[info] 
+[debug] [2026-05-05T09:31:53.859Z] defaultcredentials: writing to file C:\Users\Dell\AppData\Roaming\firebase\signingyour77_gmail_com_application_default_credentials.json
+[debug] [2026-05-05T09:31:53.863Z] Setting GAC to C:\Users\Dell\AppData\Roaming\firebase\signingyour77_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Dell\\AppData\\Roaming\\firebase\\signingyour77_gmail_com_application_default_credentials.json"}}
+[debug] [2026-05-05T09:31:53.864Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:53.864Z] Checked if tokens are valid: true, expires at: 1777976287071
+[debug] [2026-05-05T09:31:53.864Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/ncc-1945/adminSdkConfig [none]
+[debug] [2026-05-05T09:31:54.937Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/ncc-1945/adminSdkConfig 200
+[debug] [2026-05-05T09:31:54.937Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/ncc-1945/adminSdkConfig {"projectId":"ncc-1945","storageBucket":"ncc-1945.firebasestorage.app"}
+[info] i  functions: Watching "D:\Harsha\WebDev\NCC\NCC-v3\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"D:\\Harsha\\WebDev\\NCC\\NCC-v3\\functions\" for Cloud Functions..."}}
+[error] !!  functions: Failed to load function definition from source: FirebaseError: could not deploy functions because the "functions" directory was not found. Please create it or specify a different source directory in firebase.json {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: could not deploy functions because the \u001b[1m\"functions\"\u001b[22m directory was not found. Please create it or specify a different source directory in firebase.json"}}

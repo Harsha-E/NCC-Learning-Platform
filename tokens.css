@@ -1,0 +1,92 @@
+/* NCC Design Tokens - Indian Tricolor Palette */
+:root {
+  /* Primary Colors */
+  --saffron-500: #FF9933;
+  --saffron-400: #FFB366;
+  --saffron-600: #E6821A;
+  
+  --green-500: #138808;
+  --green-400: #1AB30A;
+  --green-600: #0D6606;
+  
+  --navy-500: #000080;
+  --navy-400: #1A1AE6;
+  --navy-600: #000066;
+  
+  --chakra-blue: #06038D;
+
+  /* Semantic Tokens - Light Theme */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #555555;
+  --border-color: #E0E0E0;
+  
+  --accent-primary: var(--saffron-500);
+  --accent-secondary: var(--green-500);
+  --accent-nav: var(--navy-500);
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Typography */
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
+[data-theme="dark"] {
+  /* 1. Deepest base layer */
+  --bg-primary: #070710;     
+
+  /* 2. Noticeably lighter for sidebars/menus */
+  --bg-secondary: #111122;   
+
+  /* 3. Brightest dark-surface for cards to create depth */
+  --bg-card: #1E1E36;        
+  
+  /* 4. Brighter text for readability */
+  --text-primary: #F8F8F2;   
+  --text-secondary: #A1A1AA; 
+
+  /* 5. Sharper, highly visible border to separate elements */
+  --border-color: #3A3A5A;   
+  
+  /* Accents */
+  --accent-primary: var(--saffron-500); 
+  --accent-secondary: var(--green-400);
+}

@@ -1,0 +1,370 @@
+/* NCC Base Styles - Reset + Global */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== GLOBAL APP STATE ==================== */
+body {
+  overflow: hidden; /* Lock scrolling while routing/loading */
+}
+
+body.loaded {
+  overflow: auto; /* Unlock when view is ready */
+}
+
+/* ==================== SPLASH SCREEN ==================== */
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-primary);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* Hardware-accelerated smooth fade */
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+}
+
+body.loaded #splash-screen {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ==================== GLOBAL LOADER ==================== */
+#global-loader {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-primary);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* Hardware-accelerated smooth fade */
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+}
+
+#global-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 { font-size: var(--text-base); }
+
+p {
+  margin-bottom: var(--space-4);
+}
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent-secondary);
+}
+
+/* Lists */
+ul, ol {
+  padding-left: var(--space-6);
+}
+
+li {
+  margin-bottom: var(--space-2);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Forms */
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Code */
+code, pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+pre {
+  background: var(--bg-secondary);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+/* Utility Classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* =========================================
+   LUXURY SHIMMER (SHINE) SKELETON
+   ========================================= */
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+    background: #1e293b;
+    background-image: linear-gradient(
+        90deg, 
+        rgba(30, 41, 59, 0) 0, 
+        rgba(51, 65, 85, 0.4) 20%, 
+        rgba(71, 85, 105, 0.7) 50%, 
+        rgba(51, 65, 85, 0.4) 80%, 
+        rgba(30, 41, 59, 0) 100%
+    );
+    background-repeat: no-repeat;
+    background-size: 1000px 100%;
+    animation: shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    border-radius: 8px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-text { height: 1.2rem; width: 100%; margin-bottom: 0.75rem; }
+.skeleton-title { height: 2.5rem; width: 65%; margin-bottom: 1.5rem; }
+.skeleton-card { height: 160px; width: 100%; margin-bottom: 1.5rem; border-radius: 16px; }
+
+/* THE APPLE-STYLE LUXURY PROGRESS BAR */
+#readingProgressContainer {
+    position: fixed; top: 4.5rem; left: 0; right: 0; height: 4px; 
+    background: rgba(255, 255, 255, 0.03); z-index: 1005; 
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+#readingProgress {
+    height: 100%; width: 0%; will-change: width;
+    background: linear-gradient(90deg, #60A5FA, #8B5CF6, #F472B6);
+    transition: width 0.1s linear; 
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+/* ==========================================================================
+   GLOBAL RESPONSIVE & NAVBAR CLEARANCE OVERRIDES
+   ========================================================================== */
+
+:root {
+    /* The exact math to clear the floating pill navbar */
+    --nav-clearance: 8rem; 
+    --nav-clearance-mobile: 6.5rem;
+}
+
+/* 1. Global Viewport Padding Fix */
+.dash-viewport, 
+.profile-viewport, 
+.learning-viewport,
+.quizzes-viewport {
+    padding-top: var(--nav-clearance) !important;
+    box-sizing: border-box;
+    min-height: 100dvh;
+}
+
+/* 2. Universal Responsive Grids */
+/* Overrides hardcoded repeat(3, 1fr) found in JS components */
+.features-grid,
+.story-grid,
+.bento-grid,
+.module-list,
+.quiz-grid {
+    display: grid !important;
+    /* This single line makes ANY grid perfectly mobile responsive */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem;
+}
+
+/* 3. Mobile Specific Overrides */
+@media (max-width: 768px) {
+    /* Adjust clearance for mobile screens */
+    .dash-viewport, 
+    .profile-viewport, 
+    .learning-viewport,
+    .quizzes-viewport {
+        padding-top: var(--nav-clearance-mobile) !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Stack flex containers that are side-by-side on desktop */
+    .hero-header, .hero-split, .nav-actions, .stat-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+    }
+
+    /* Ensure buttons span full width on mobile for touch targets */
+    .btn, .btn-primary, .btn-ghost {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ADD THIS TO YOUR GLOBAL CSS (e.g., css/base.css) */
+
+/* 1. Global Viewport Padding Fix (Clears the Floating Navbar) */
+.stats-viewport, 
+.dash-viewport, 
+.quiz-viewport, 
+.learning-viewport {
+    padding-top: 8rem !important; /* Forces clearance */
+    padding-bottom: 4rem !important;
+    min-height: 100dvh !important;
+    box-sizing: border-box;
+}
+
+/* 2. Universal Responsive Grids */
+.metrics-grid, 
+.form-grid, 
+.story-grid, 
+.features-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem;
+}
+
+/* 3. Fluid Typography Overrides */
+.hero-header h1, 
+.greeting-name, 
+.header-title,
+.auth-title {
+    font-size: clamp(2rem, 5vw, 3rem) !important;
+}
+
+/* 4. Mobile Overrides */
+@media (max-width: 768px) {
+    .stats-viewport, .dash-viewport, .quiz-viewport { padding-top: 6.5rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+    .action-banner, .quiz-card { flex-direction: column !important; align-items: flex-start !important; }
+    .btn-launch, .btn { width: 100% !important; text-align: center; }
+}
+
+/* Make sure .module-list is NOT in this comma-separated list! */
+.features-grid,
+.story-grid,
+.bento-grid,
+.quiz-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem;
+}

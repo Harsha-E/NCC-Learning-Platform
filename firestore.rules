@@ -1,0 +1,85 @@
+// filepath: firestore.rules
+// Firestore Security Rules for NCC Cadet Learning Platform
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isVerified() {
+      return request.auth.token.email_verified == true;
+    }
+    
+    function role() {
+      return request.auth.token.role;
+    }
+    
+    function isCadet() {
+      return isAuth() && isVerified() && role() == 'cadet';
+    }
+    
+    function isAdmin() {
+      return isAuth() && role() in ['admin', 'superadmin'];
+    }
+    
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    // Users collection - fully open for authenticated users
+    match /users/{uid} {
+      allow read, write: if isOwner(uid) && isAuth();
+      allow read, write: if isAdmin();
+    }
+
+    // Content collection - readable by all auth users
+    match /content/{document=**} {
+      allow read: if isAuth();
+      allow read, write: if isAdmin();
+    }
+
+    // Quiz questions - readable by all auth users
+    match /quizzes/{quizId}/questions/{qId} {
+      allow read: if isAuth();
+      allow read, write: if isAdmin();
+    }
+
+    // Progress - owner can read/write
+    match /progress/{uid}/{document=**} {
+      allow read, write: if isOwner(uid) && isAuth();
+      allow read, write: if isAdmin();
+    }
+
+    // Mock attempts - owner can read/write
+    match /mockAttempts/{uid}/{document=**} {
+      allow read, write: if isOwner(uid) && isAuth();
+      allow read, write: if isAdmin();
+    }
+
+    // Audit logs - admin only
+    match /auditLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // System config - readable by auth users, writable by superadmin
+    match /systemConfig/{document=**} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Upload jobs - admin only
+    match /uploadJobs/{jobId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Metadata - readable by all auth users, writable by admin
+    match /metadata/{document=**} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+  }
+}
