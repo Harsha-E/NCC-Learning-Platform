@@ -26,7 +26,7 @@ class NavbarComponent {
                 .aww-navbar {
                     position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
                     z-index: 9000; display: flex; align-items: center; justify-content: space-between;
-                    height: 4.5rem; width: 90%; max-width: 860px; padding: 0 0.5rem 0 1.5rem;
+                    height: 4.5rem; width: 90%; max-width: 860px; padding: 0 1rem 0 1.5rem;
                     background: rgba(15, 20, 25, 0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
                     border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 100px;
                     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -47,31 +47,41 @@ class NavbarComponent {
 
                 /* STRICT NO-SQUISH CONTAINER FOR ACTIONS */
                 .nav-actions { 
-                    display: flex; 
-                    flex-direction: row; 
-                    flex-wrap: nowrap;   
-                    align-items: center; 
-                    justify-content: flex-end; 
-                    gap: 0.5rem; 
-                    flex-shrink: 0; 
+                    display: flex !important; 
+                    flex-direction: row !important; 
+                    flex-wrap: nowrap !important;
+                    align-items: center !important; 
+                    justify-content: flex-end !important;
+                    gap: 0.75rem !important; 
+                    flex-shrink: 0 !important;
+                    margin-left: auto;
                 }
                 
                 .icon-btn { 
-                    width: 44px; height: 44px; border-radius: 50%; overflow: hidden; 
-                    border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-                    cursor: pointer; background: #1C1C1E; 
-                    display: flex; align-items: center; justify-content: center; 
-                    color: #EBEBF5; text-decoration: none;
-                    flex-shrink: 0; /* PREVENTS CRUSHING */
-                    padding: 0; box-sizing: border-box;
+                    width: 44px !important; 
+                    height: 44px !important; 
+                    min-width: 44px !important;
+                    min-height: 44px !important;
+                    aspect-ratio: 1 / 1 !important;
+                    border-radius: 50% !important; 
+                    background: rgba(255,255,255,0.9);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    flex-shrink: 0 !important;
+                    padding: 0 !important;
+                    color: #EBEBF5;
+                    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .icon-btn:hover { border-color: #0A84FF; color: #0A84FF; transform: scale(1.05) translateY(-2px); box-shadow: 0 5px 15px rgba(10,132,255,0.2); }
                 .icon-btn.logout:hover { border-color: #FF453A; color: #FF453A; box-shadow: 0 5px 15px rgba(255,69,58,0.2); }
                 
                 .nav-icon { 
-                    width: 20px; height: 20px; stroke: currentColor; fill: none; 
-                    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; 
-                    flex-shrink: 0; display: block;
+                    width: 20px !important; 
+                    height: 20px !important; 
+                    stroke-width: 2.5; 
+                    flex-shrink: 0 !important;
                 }
                 
                 /* --- MOBILE DOCK --- */
@@ -97,27 +107,11 @@ class NavbarComponent {
                 .btn-confirm:hover { background: #D70015; box-shadow: 0 8px 25px rgba(255,69,58,0.4); }
 
                 @media (max-width: 768px) {
-                    .aww-navbar { 
-                        top: 1rem; width: 92%; 
-                        padding: 0.5rem 0.75rem; 
-                        justify-content: space-between; 
-                        height: auto; 
-                    }
-                    .nav-brand { flex-shrink: 0; }
+                    .aww-navbar { top: 1rem; width: 94%; padding: 0.5rem 0.75rem; height: auto; }
+                    .nav-brand span { display: none; }
                     .nav-links { display: none; }
-                    
-                    /* Force layout right and prevent squishing */
-                    .nav-actions { 
-                        display: flex;
-                        flex-direction: row;
-                        flex-wrap: nowrap;
-                        gap: 0.75rem; 
-                        margin-left: auto; 
-                        justify-content: flex-end;
-                    }
-                    .icon-btn { width: 38px; height: 38px; flex-shrink: 0; }
-                    .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
-                    
+                    .nav-actions { margin-left: auto !important; width: auto !important; }
+                    .icon-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; }
                     .mobile-dock { display: flex; }
                 }
             `;
@@ -127,110 +121,116 @@ class NavbarComponent {
     }
 
     render() {
-        if (!this.navRoot) return;
-        const user = Store.get('user');
-        const profile = Store.get('profile');
-        
-        const currentHash = window.location.hash || '#/';
-        const isActive = (path) => currentHash.includes(path) ? 'active' : '';
+    if (!this.navRoot) return;
+    const user = Store.get('user');
+    const profile = Store.get('profile');
+    
+    const currentHash = window.location.hash || '#/';
+    const isActive = (path) => currentHash.includes(path) ? 'active' : '';
 
-        // --- HIDE NAVBAR IN FORGE ---
-        const isContentForge = currentHash.includes('admin/dashboard');
-        if (isContentForge) {
-            this.navRoot.innerHTML = '';
-            return;
-        }
+    let navHtml = '';
 
-        let navHtml = '';
+    if (user) {
+        const isAdmin = profile?.role === 'admin';
+        let linksHtml = '';
+        let mobileDockHtml = '';
 
-        if (user) {
-            const isAdmin = profile?.role === 'admin';
-            let linksHtml = '';
-            let mobileDockHtml = '';
-
-            if (isAdmin) {
-                linksHtml = `
-                    <a href="/admin/dashboard" class="nav-item ${isActive('admin/dashboard')}" data-nav>Content Forge</a>
-                    <a href="/admin/blueprint" class="nav-item ${isActive('admin/blueprint')}" data-nav>System Blueprint</a>
-                `;
-                mobileDockHtml = `
-                    <a href="/admin/dashboard" class="dock-item ${isActive('admin/dashboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg></a>
-                    <a href="/admin/blueprint" class="dock-item ${isActive('admin/blueprint')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></a>
-                `;
-            } else {
-                linksHtml = `
-                    <a href="/dashboard" class="nav-item ${isActive('/dashboard')}" data-nav>Dashboard</a>
-                    <a href="/learning" class="nav-item ${isActive('/learning')}" data-nav>Curriculum</a>
-                    <a href="/quizzes" class="nav-item ${isActive('/quizzes')}" data-nav>Telemetry</a>
-                `;
-                mobileDockHtml = `
-                    <a href="/dashboard" class="dock-item ${isActive('/dashboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg></a>
-                    <a href="/learning" class="dock-item ${isActive('/learning')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></a>
-                    <a href="/quizzes" class="dock-item ${isActive('/quizzes')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></a>
-                `;
-            }
-
-            navHtml = `
-                <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot"></div><span>NCC CORE</span></div>
-                    <div class="nav-links">${linksHtml}</div>
-                    
-                    <div class="nav-actions">
-                        <a href="/profile" class="icon-btn" data-nav title="Profile">
-                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        </a>
-                        <button id="navLogoutBtn" class="icon-btn logout" title="Logout">
-                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        </button>
-                    </div>
-                </nav>
-                <div class="mobile-dock" id="mobile-dock">${mobileDockHtml}</div>
-                
-                <div class="logout-overlay" id="customLogoutModal">
-                    <div class="logout-card">
-                        <div class="logout-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
-                        <h3 class="logout-title">Terminate Session?</h3>
-                        <p class="logout-desc">You are about to sever your connection to the NCC Terminal. Active unsaved telemetry may be lost.</p>
-                        <div class="logout-actions">
-                            <button class="modal-btn btn-cancel" id="cancelLogout">Abort</button>
-                            <button class="modal-btn btn-confirm" id="confirmLogout">Log Out</button>
-                        </div>
-                    </div>
-                </div>
+        if (isAdmin) {
+            linksHtml = `
+                <a href="/admin/dashboard" class="nav-item ${isActive('admin/dashboard')}" data-nav>Content Forge</a>
+                <a href="/admin/blueprint" class="nav-item ${isActive('admin/blueprint')}" data-nav>System Blueprint</a>
+            `;
+            mobileDockHtml = `
+                <a href="/admin/dashboard" class="dock-item ${isActive('admin/dashboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg></a>
+                <a href="/admin/blueprint" class="dock-item ${isActive('admin/blueprint')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></a>
             `;
         } else {
-            navHtml = `
-                <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC CORE</span></div>
-                    <div class="nav-actions">
-                        <a href="/login" class="nav-item" data-nav>Sign In</a>
-                    </div>
-                </nav>
+            linksHtml = `
+                <a href="/dashboard" class="nav-item ${isActive('/dashboard')}" data-nav>Dashboard</a>
+                <a href="/learning" class="nav-item ${isActive('/learning')}" data-nav>Curriculum</a>
+                <a href="/quizzes" class="nav-item ${isActive('/quizzes')}" data-nav>Telemetry</a>
+            `;
+            mobileDockHtml = `
+                <a href="/dashboard" class="dock-item ${isActive('/dashboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg></a>
+                <a href="/learning" class="dock-item ${isActive('/learning')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></a>
+                <a href="/quizzes" class="dock-item ${isActive('/quizzes')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></a>
             `;
         }
 
-        this.navRoot.innerHTML = navHtml;
-
-        const logoutBtn = document.getElementById('navLogoutBtn');
-        const modal = document.getElementById('customLogoutModal');
-        const cancelBtn = document.getElementById('cancelLogout');
-        const confirmBtn = document.getElementById('confirmLogout');
-
-        if (logoutBtn && modal) {
-            logoutBtn.onclick = () => modal.classList.add('active');
-            cancelBtn.onclick = () => modal.classList.remove('active');
-            modal.onclick = (e) => { if(e.target === modal) modal.classList.remove('active'); };
-            confirmBtn.onclick = async () => {
-                modal.classList.remove('active');
-                if (AuthService && typeof AuthService.logout === 'function') await AuthService.logout();
-                if (window.Router) window.Router.navigateTo('/login');
-            };
-        }
+        navHtml = `
+            <nav class="aww-navbar" id="global-nav">
+                <div class="nav-brand"><div class="brand-dot"></div><span>NCC CORE</span></div>
+                <div class="nav-links">${linksHtml}</div>
+                
+                <div class="nav-actions">
+                    ${!isAdmin ? `
+                    <a href="/profile" class="icon-btn" data-nav title="Profile">
+                        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </a>` : ''}
+                    <button id="navLogoutBtn" class="icon-btn logout" title="Logout">
+                        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    </button>
+                </div>
+            </nav>
+            <div class="mobile-dock" id="mobile-dock">${mobileDockHtml}</div>
+            
+            <div class="logout-overlay" id="customLogoutModal">
+                <div class="logout-card">
+                    <div class="logout-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
+                    <h3 class="logout-title">Terminate Session?</h3>
+                    <p class="logout-desc">You are about to sever your connection to the NCC Terminal. Active unsaved telemetry may be lost.</p>
+                    <div class="logout-actions">
+                        <button class="modal-btn btn-cancel" id="cancelLogout">Abort</button>
+                        <button class="modal-btn btn-confirm" id="confirmLogout">Log Out</button>
+                    </div>
+                </div>
+            </div>
+            `;
+    } else {
+        navHtml = `
+            <nav class="aww-navbar" id="global-nav">
+                <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC CORE</span></div>
+                <div class="nav-actions">
+                    <a href="/login" class="nav-item" data-nav>Sign In</a>
+                </div>
+            </nav>
+        `;
     }
+
+    this.navRoot.innerHTML = navHtml;
+    
+    // RE-BIND THE LOGOUT EVENTS
+    this.bindLogoutEvents();
+}
 
     bindEvents() {
         window.addEventListener('hashchange', () => setTimeout(() => this.render(), 50));
     }
+    bindLogoutEvents() {
+    const logoutBtn = document.getElementById('navLogoutBtn');
+    const modal = document.getElementById('customLogoutModal');
+    const cancelBtn = document.getElementById('cancelLogout');
+    const confirmBtn = document.getElementById('confirmLogout');
+
+    if (!logoutBtn || !modal) return;
+
+    logoutBtn.onclick = (e) => {
+        e.preventDefault();
+        modal.classList.add('active');
+    };
+
+    cancelBtn.onclick = () => modal.classList.remove('active');
+    
+    modal.onclick = (e) => { if(e.target === modal) modal.classList.remove('active'); };
+
+    confirmBtn.onclick = async () => {
+        modal.classList.remove('active');
+        if (AuthService && typeof AuthService.logout === 'function') {
+            await AuthService.logout();
+        }
+        if (window.Router) window.Router.navigateTo('/login');
+    };
+}
 }
 
 const Navbar = new NavbarComponent();
