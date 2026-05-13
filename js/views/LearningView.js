@@ -91,7 +91,7 @@ export default class LearningView extends AbstractView {
         .btn { padding: 0.6rem 1.25rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; }
         .btn-primary { background: var(--text-primary); color: #000; }
         .btn-ghost { background: rgba(255,255,255,0.03); color: var(--text-secondary); border: 1px solid var(--border-highlight); }
-        .btn-ghost: hover {
+        .btn-ghost:hover {
             background: #F8FAFC;
             color: #000;
         }
