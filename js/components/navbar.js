@@ -229,7 +229,7 @@ class NavbarComponent {
         if (AuthService && typeof AuthService.logout === 'function') {
             await AuthService.logout();
         }
-        if (window.Router) window.Router.navigateTo('/login');
+        if (window.Router) window.Router.navigateTo('/');
     };
 }
 }
