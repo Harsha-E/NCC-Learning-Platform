@@ -437,7 +437,7 @@ export default class QuizView extends AbstractView {
             <div class="error-container">
               <h2>Assessment Unavailable</h2>
               <p style="color: var(--text-muted); margin-bottom: 2rem;">${msg}</p>
-              <button onclick="window.history.back()" class="btn-nav" style="background: rgba(255,255,255,0.1);">Return to Module</button>
+              <a href="./module?module=${this.moduleId}" class="btn-nav" style="background: rgba(255,255,255,0.1); text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Return to Module</a>
             </div>
           </div>
       `;

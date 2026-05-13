@@ -22,12 +22,17 @@ export default class ForgotPasswordView extends AbstractView {
             --radius-md: 12px;
         }
 
+        body, #app-root {
+            background: var(--bg-abyss);
+            min-height: 100dvh;
+        }
+
         .auth-viewport {
-            min-height: 100dvh; background-color: var(--bg-abyss);
+            min-height: 100dvh; width: 100%; background-color: var(--bg-abyss);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 8.5rem 1.5rem 6.5rem 1.5rem !important; box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            position: relative; overflow: hidden;
+            position: relative; overflow: hidden; isolation: isolate;
         }
 
         /* Background Grid Illusion */
@@ -95,26 +100,26 @@ export default class ForgotPasswordView extends AbstractView {
                   <div class="auth-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                   </div>
-                  <h1 class="auth-title">System Override</h1>
-                  <p class="auth-subtitle">Enter your registered email to request a secure password reset uplink.</p>
+                  <h1 class="auth-title">Forgot Password?</h1>
+                  <p class="auth-subtitle">Enter your registered email to reset your password !</p>
               </div>
 
               <div id="feedbackBox" class="feedback-msg"></div>
 
               <form id="resetForm">
                   <div class="form-group">
-                      <label class="form-label">Encrypted Email</label>
-                      <input type="email" id="resetEmail" class="form-input" placeholder="cadet@ncc.gov.in" required autocomplete="email">
+                      <label class="form-label">Registered Email</label>
+                      <input type="email" id="resetEmail" class="form-input" placeholder="cadet@gmail.com" required autocomplete="email">
                   </div>
                   
                   <button type="submit" class="btn-submit" id="submitBtn">
-                      Transmit Request
+                      Send Mail
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                   </button>
               </form>
 
               <div class="auth-footer">
-                  Protocol remembered? <a class="auth-link" id="backToLogin">Return to Uplink</a>
+                  Memorized password? <a class="auth-link" id="backToLogin">Return to Login</a>
               </div>
           </div>
       </div>

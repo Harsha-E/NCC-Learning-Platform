@@ -60,6 +60,11 @@ const ContentService = {
     );
   },
 
+  async getModule(certificate, moduleId, wing) {
+    const modules = await this.getModules(certificate, wing);
+    return modules.find(mod => mod.id === moduleId) || null;
+  },
+
   // 3. Fetch Chapters (Protected by Cache)
   async getChapters(certificate, moduleId) {
     const certId = this.normalizeCertId(certificate);

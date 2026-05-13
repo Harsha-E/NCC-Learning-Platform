@@ -4,8 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NCC Cadet Learning Platform</title>
-  
-  <base href="/NCC-Learning-Platform/">
+
+  <script>
+    (function() {
+      const isGithubPages = window.location.hostname.endsWith('github.io');
+      const segments = window.location.pathname.split('/').filter(Boolean);
+      const basePath = isGithubPages && segments.length > 0 ? `/${segments[0]}/` : '/';
+      const baseTag = document.createElement('base');
+      baseTag.href = basePath;
+      document.head.appendChild(baseTag);
+      window.__APP_BASE_PATH__ = basePath;
+
+      if (!window.location.hash) {
+        const relativePath = window.location.pathname.startsWith(basePath)
+          ? `/${window.location.pathname.slice(basePath.length).replace(/^\/+/, '')}`
+          : window.location.pathname;
+        const routeCandidate = relativePath === '/index.html'
+          ? '/'
+          : (relativePath.length > 1 ? relativePath.replace(/\/+$/, '') : relativePath);
+        const looksLikeAsset = /\.[a-z0-9]+$/i.test(routeCandidate);
+
+        if (routeCandidate !== '/' && !looksLikeAsset) {
+          window.history.replaceState(null, '', `${basePath}#${routeCandidate}${window.location.search}`);
+        }
+      }
+    })();
+  </script>
   
   <link rel="icon" href="./flaticon.png" type="image/png">
   <link rel="apple-touch-icon" href="./flaticon.png">

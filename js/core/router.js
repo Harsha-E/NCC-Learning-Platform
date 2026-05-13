@@ -1,6 +1,8 @@
 import { waitForAuthReady, getCachedAuthData } from './firebase-init.js';
 import { initNavbar } from '../components/navbar.js';
 
+const APP_BASE_PATH = new URL('../../', import.meta.url).pathname;
+
 const ROUTES = {
   '/': { view: () => import('../views/HomeView.js'), rules: { guestOnly: true } },
   '/login': { view: () => import('../views/LoginView.js'), rules: { guestOnly: true } },
@@ -24,13 +26,54 @@ const ROUTES = {
 };
 
 export default class Router {
+  static stripBasePath(pathname = window.location.pathname) {
+    if (!pathname) return '/';
+    if (pathname === APP_BASE_PATH.slice(0, -1)) return '/';
+    if (pathname.startsWith(APP_BASE_PATH)) {
+      const stripped = pathname.slice(APP_BASE_PATH.length).replace(/^\/+/, '');
+      const normalized = stripped ? `/${stripped}` : '/';
+      return normalized.length > 1 ? normalized.replace(/\/+$/, '') : normalized;
+    }
+    return pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  }
+
+  static normalizeDestination(destination) {
+    let cleanDest = String(destination || '/').trim();
+    if (!cleanDest) return '/';
+
+    if (cleanDest.startsWith('#')) {
+      cleanDest = cleanDest.slice(1);
+    }
+
+    try {
+      const resolved = new URL(cleanDest, window.location.href);
+      if (resolved.origin === window.location.origin) {
+        if (resolved.hash.startsWith('#/')) {
+          return resolved.hash.slice(1);
+        }
+        cleanDest = `${this.stripBasePath(resolved.pathname)}${resolved.search}`;
+      }
+    } catch (error) {
+      // Fall back to string normalization below for route-like inputs.
+    }
+
+    if (cleanDest.startsWith(APP_BASE_PATH)) {
+      cleanDest = `/${cleanDest.slice(APP_BASE_PATH.length).replace(/^\/+/, '')}`;
+    }
+
+    if (cleanDest.startsWith('./')) cleanDest = cleanDest.substring(1);
+    if (!cleanDest.startsWith('/')) cleanDest = '/' + cleanDest;
+
+    return cleanDest.length > 1 ? cleanDest.replace(/\/+$/, '') : cleanDest;
+  }
 
   // Extracts the path from the hash (e.g., "#/dashboard?user=1" -> "/dashboard")
   static getHashPath() {
     let hash = window.location.hash.slice(1);
-    if (!hash) return '/';
+    if (!hash) return this.stripBasePath();
     const path = hash.split('?')[0]; 
-    return path || '/';
+    if (!path) return '/';
+    return path.length > 1 ? path.replace(/\/+$/, '') : path;
   }
 
   // Extracts query parameters from the hash (e.g., "#/quiz?module=1" -> { module: '1' })
@@ -83,17 +126,7 @@ export default class Router {
 
   // Converts standard paths into hash paths and updates the URL
   static async navigateTo(destination) {
-     let cleanDest = destination;
-     
-     // Strip out origin if absolute URL
-     if (cleanDest.startsWith(window.location.origin)) {
-         cleanDest = cleanDest.replace(window.location.origin, '');
-     }
-     
-     // Handle relative paths
-     if (cleanDest.startsWith('./')) cleanDest = cleanDest.substring(1);
-     if (!cleanDest.startsWith('/')) cleanDest = '/' + cleanDest;
-     
+     const cleanDest = this.normalizeDestination(destination);
      const newHash = '#' + cleanDest;
 
      if (window.location.hash === newHash) return; // Already there
@@ -124,9 +157,13 @@ export default class Router {
       await this.navigate();
     });
     
-    // Boot sequence: If no hash exists, default to home
+    // Boot sequence: migrate any direct-path URL into the hash router
     if (!window.location.hash || window.location.hash === '#') {
-        window.location.hash = '#/'; 
+        const pathFromUrl = this.stripBasePath(window.location.pathname);
+        const mappedRoute = this.MapsTo(pathFromUrl) ? pathFromUrl : '/';
+        const query = window.location.search || '';
+        window.history.replaceState(null, '', `${APP_BASE_PATH}#${mappedRoute}${query}`);
+        await this.navigate();
     } else {
         await this.navigate();
     }
@@ -138,7 +175,7 @@ export default class Router {
 
     if (appRoot) {
       appRoot.style.opacity = '0';
-      appRoot.style.transform = 'scale(0.98)';
+      appRoot.style.transform = 'none';
       appRoot.style.transition = 'none'; 
     }
 
@@ -183,9 +220,9 @@ export default class Router {
         const delay = Math.max(0, 1500 - elapsed);
 
         setTimeout(() => {
-          appRoot.style.transition = 'opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+          appRoot.style.transition = 'opacity 0.5s ease';
           appRoot.style.opacity = '1';
-          appRoot.style.transform = 'scale(1)';
+          appRoot.style.transform = 'none';
 
           const loader = document.getElementById('global-loader');
           if (loader) {

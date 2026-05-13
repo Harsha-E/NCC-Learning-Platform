@@ -95,7 +95,7 @@ export default class HomeView extends AbstractView {
             margin-bottom: 2rem; background: rgba(255, 153, 51, 0.05); backdrop-filter: blur(10px);
         }
         
-        .hero-title { font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; }
+        .hero-title { color: var(--text-pure); font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; }
         .hero-sub { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 3rem 0; max-width: 500px; }
 
         .hero-actions { display: flex; gap: 1rem; justify-content: flex-start; }
@@ -122,7 +122,7 @@ export default class HomeView extends AbstractView {
         
         .b-icon { width: 56px; height: 56px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); color: var(--text-pure); border: 1px solid var(--border-glass); }
         .b-text { flex: 1; }
-        .b-title { font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; letter-spacing: -0.01em; }
+        .b-title { font-size: 1.15rem;color: var(--text-pure);font-weight: 700; margin: 0 0 0.5rem 0; letter-spacing: -0.01em; }
         .b-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin: 0; }
 
         @media (max-width: 1024px) {
@@ -198,8 +198,7 @@ export default class HomeView extends AbstractView {
               const route = btn.getAttribute('href');
               if (route) {
                   this.destroy(); 
-                  window.history.pushState(null, null, route);
-                  window.dispatchEvent(new Event('popstate'));
+                  Router.navigateTo(route);
               }
           };
       });
@@ -219,9 +218,17 @@ export default class HomeView extends AbstractView {
       let width, height, cx, cy;
       let particles = [];
       const numParticles = window.innerWidth > 768 ? 1200 : 600;
+      const phaseThresholds = {
+          ORBIT: 28,
+          FLAG: 22,
+          SPIRAL: 16,
+          GRID: 12
+      };
       
       this.currentState = 'CHAOS'; // Initialized here from the class constructor
       let globalTime = 0;
+      let lastFrameTime = performance.now();
+      this.phaseMetrics = { state: 'CHAOS', avgDistance: Infinity };
       
       const resize = () => {
           // Precisely map to window dimensions since viewport is now fixed Fullscreen
@@ -267,54 +274,69 @@ export default class HomeView extends AbstractView {
               this.gridY = Math.floor(this.id / cols) * spaceY + (spaceY/2);
           }
 
-          update(state, time) {
-              let targetX = this.x;
-              let targetY = this.y;
-              let lerpSpeed = 0.05;
+          getTarget(state, time) {
+              if (state === 'ORBIT') {
+                  return {
+                      x: cx + Math.cos(this.angle + time * this.speedMod * 10) * this.radius,
+                      y: cy + Math.sin(this.angle + time * this.speedMod * 10) * this.radius * 0.4,
+                      color: this.baseColor,
+                      lerpSpeed: 0.04
+                  };
+              }
+
+              if (state === 'FLAG') {
+                  const waveOffset = Math.sin(this.flagX * 0.01 - time * 3) * 40;
+                  return {
+                      x: cx + this.flagX,
+                      y: cy + this.flagY + waveOffset,
+                      color: this.flagColor,
+                      lerpSpeed: 0.06
+                  };
+              }
+
+              if (state === 'SPIRAL') {
+                  return {
+                      x: cx + this.spiralX,
+                      y: cy + this.spiralY,
+                      color: '#FFFFFF',
+                      lerpSpeed: 0.05
+                  };
+              }
+
+              if (state === 'GRID') {
+                  return {
+                      x: this.gridX,
+                      y: this.gridY,
+                      color: '#0A84FF',
+                      lerpSpeed: 0.08
+                  };
+              }
+
+              return null;
+          }
+
+          update(state, time, frameFactor) {
+              const target = this.getTarget(state, time);
 
               if (state === 'CHAOS') {
-                  this.x += Math.cos(this.angle) * 0.5;
-                  this.y += Math.sin(this.angle) * 0.5;
+                  this.x += Math.cos(this.angle) * 0.5 * frameFactor;
+                  this.y += Math.sin(this.angle) * 0.5 * frameFactor;
                   if (this.x < 0) this.x = width; if (this.x > width) this.x = 0;
                   if (this.y < 0) this.y = height; if (this.y > height) this.y = 0;
                   this.color = this.baseColor;
-              } 
-              else if (state === 'ORBIT') {
-                  targetX = cx + Math.cos(this.angle + time * this.speedMod * 10) * this.radius;
-                  targetY = cy + Math.sin(this.angle + time * this.speedMod * 10) * this.radius * 0.4;
-                  this.color = this.baseColor;
-                  lerpSpeed = 0.04;
-              }
-              else if (state === 'FLAG') {
-                  const waveOffset = Math.sin(this.flagX * 0.01 - time * 3) * 40;
-                  targetX = cx + this.flagX;
-                  targetY = cy + this.flagY + waveOffset;
-                  this.color = this.flagColor;
-                  lerpSpeed = 0.06;
-              }
-              else if (state === 'SPIRAL') {
-                  targetX = cx + this.spiralX;
-                  targetY = cy + this.spiralY;
-                  this.color = '#FFFFFF';
-                  lerpSpeed = 0.05;
-              }
-              else if (state === 'GRID') {
-                  targetX = this.gridX;
-                  targetY = this.gridY;
-                  this.color = '#0A84FF'; // Discipline Blue
-                  lerpSpeed = 0.08;
               }
               else if (state === 'CONSTELLATION') {
-                  this.x += Math.cos(this.angle) * 0.1;
-                  this.y += Math.sin(this.angle) * 0.1;
+                  this.x += Math.cos(this.angle) * 0.1 * frameFactor;
+                  this.y += Math.sin(this.angle) * 0.1 * frameFactor;
                   if (this.x < 0) this.x = width; if (this.x > width) this.x = 0;
                   if (this.y < 0) this.y = height; if (this.y > height) this.y = 0;
                   this.color = 'rgba(10, 132, 255, 0.4)';
               }
-
-              if (state !== 'CHAOS' && state !== 'CONSTELLATION') {
-                  this.x += (targetX - this.x) * lerpSpeed;
-                  this.y += (targetY - this.y) * lerpSpeed;
+              else if (target) {
+                  const lerpFactor = 1 - Math.pow(1 - target.lerpSpeed, frameFactor);
+                  this.x += (target.x - this.x) * lerpFactor;
+                  this.y += (target.y - this.y) * lerpFactor;
+                  this.color = target.color;
               }
           }
 
@@ -328,15 +350,38 @@ export default class HomeView extends AbstractView {
 
       for (let i = 0; i < numParticles; i++) particles.push(new Particle(i));
 
-      const animate = () => {
+      const animate = (timestamp = performance.now()) => {
           this.engineId = requestAnimationFrame(animate);
-          globalTime += 0.016;
+          const deltaSeconds = Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+          lastFrameTime = timestamp;
+          const frameFactor = Math.max(0.5, deltaSeconds * 60);
+          globalTime += deltaSeconds;
           
           ctx.fillStyle = 'rgba(3, 5, 8, 0.25)'; // Trail effect
           ctx.fillRect(0, 0, width, height);
 
           // We pass this.currentState directly into the loop, allowing skipIntro to override it instantly!
-          particles.forEach(p => { p.update(this.currentState, globalTime); p.draw(); });
+          particles.forEach(p => { p.update(this.currentState, globalTime, frameFactor); p.draw(); });
+
+          if (phaseThresholds[this.currentState]) {
+              const sampleStride = Math.max(1, Math.floor(numParticles / 80));
+              let totalDistance = 0;
+              let sampleCount = 0;
+
+              for (let i = 0; i < particles.length; i += sampleStride) {
+                  const target = particles[i].getTarget(this.currentState, globalTime);
+                  if (!target) continue;
+                  totalDistance += Math.hypot(target.x - particles[i].x, target.y - particles[i].y);
+                  sampleCount++;
+              }
+
+              this.phaseMetrics = {
+                  state: this.currentState,
+                  avgDistance: sampleCount > 0 ? totalDistance / sampleCount : Infinity
+              };
+          } else {
+              this.phaseMetrics = { state: this.currentState, avgDistance: Infinity };
+          }
 
           if (this.currentState === 'CONSTELLATION') {
               ctx.strokeStyle = 'rgba(10, 132, 255, 0.05)';
@@ -363,14 +408,41 @@ export default class HomeView extends AbstractView {
           this.timeouts.push(id);
       });
 
-      const playPhase = async (textNum, stateName, showDuration) => {
+      const waitForPhaseCompletion = (stateName, minDisplayMs, maxDisplayMs) => new Promise(resolve => {
+          const start = performance.now();
+
+          const tick = () => {
+              if (this.hasSkipped) {
+                  resolve();
+                  return;
+              }
+
+              const elapsed = performance.now() - start;
+              const threshold = phaseThresholds[stateName];
+              const isSettled = !threshold || (
+                  this.phaseMetrics.state === stateName &&
+                  this.phaseMetrics.avgDistance <= threshold
+              );
+
+              if ((elapsed >= minDisplayMs && isSettled) || elapsed >= maxDisplayMs) {
+                  resolve();
+                  return;
+              }
+
+              requestAnimationFrame(tick);
+          };
+
+          requestAnimationFrame(tick);
+      });
+
+      const playPhase = async (textNum, stateName, minDisplayMs, maxDisplayMs) => {
           if (this.hasSkipped) return;
           
           this.currentState = stateName;
           const textEl = document.getElementById(`text-${textNum}`);
           if (textEl) textEl.classList.add('active');
           
-          await delay(showDuration); // Hold text on screen
+          await waitForPhaseCompletion(stateName, minDisplayMs, maxDisplayMs);
           if (this.hasSkipped) return;
           
           if (textEl) textEl.classList.replace('active', 'exit');
@@ -381,11 +453,11 @@ export default class HomeView extends AbstractView {
 
       const runDirector = async () => {
           await delay(500); // Initial boot delay
-          await playPhase(1, 'CHAOS', 2500);
-          await playPhase(2, 'ORBIT', 2500);
-          await playPhase(3, 'FLAG', 3000);
-          await playPhase(4, 'SPIRAL', 2500);
-          await playPhase(5, 'GRID', 2500);
+          await playPhase(1, 'CHAOS', 2500, 3200);
+          await playPhase(2, 'ORBIT', 2500, 4200);
+          await playPhase(3, 'FLAG', 3000, 4600);
+          await playPhase(4, 'SPIRAL', 2500, 4200);
+          await playPhase(5, 'GRID', 2500, 4200);
           
           if (this.hasSkipped) return;
           
