@@ -160,7 +160,7 @@ class NavbarComponent {
 
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot"></div><span>NCC CORE</span></div>
+                    <div class="nav-brand"><div class="brand-dot"></div><span>NCC Learning Platform</span></div>
                     <div class="nav-links">${linksHtml}</div>
                     
                     <div class="nav-actions">
@@ -191,7 +191,7 @@ class NavbarComponent {
             // --- UPDATED GUEST VIEW WITH BOTH BUTTONS ---
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC CORE</span></div>
+                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC Learning Platform</span></div>
                     <div class="nav-actions">
                         <a href="/login" class="nav-item ${isActive('/login')}" data-nav>Sign In</a>
                         <a href="/register" class="nav-item ${isActive('/register')}" data-nav style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2);">Register</a>
