@@ -55,11 +55,8 @@ export default class HomeView extends AbstractView {
             position: absolute; font-size: clamp(3rem, 5vw, 6rem); font-weight: 300;
             letter-spacing: -0.02em; text-align: center; opacity: 0; transform: scale(0.95) translateY(20px);
             transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+            --gradient-fallback: #FFFFFF;
             background: linear-gradient(180deg, #FFF 0%, rgba(255,255,255,0.4) 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            background-clip: text !important;
-            color: transparent !important;
             margin: 0; padding: 0 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .story-text.active { opacity: 1; transform: scale(1) translateY(0); }
@@ -139,11 +136,11 @@ export default class HomeView extends AbstractView {
           <canvas id="story-canvas"></canvas>
 
           <div class="narrative-layer">
-              <h2 class="story-text" id="text-1">A million different paths.</h2>
-              <h2 class="story-text" id="text-2">Drawn by a single call.</h2>
-              <h2 class="story-text" id="text-3">United by one purpose.</h2>
-              <h2 class="story-text" id="text-4">Aligned in formation.</h2>
-              <h2 class="story-text" id="text-5">Forged by discipline.</h2>
+              <h2 class="story-text gradient-text" id="text-1">A million different paths.</h2>
+              <h2 class="story-text gradient-text" id="text-2">Drawn by a single call.</h2>
+              <h2 class="story-text gradient-text" id="text-3">United by one purpose.</h2>
+              <h2 class="story-text gradient-text" id="text-4">Aligned in formation.</h2>
+              <h2 class="story-text gradient-text" id="text-5">Forged by discipline.</h2>
           </div>
           
           <div class="skip-hint" id="skip-hint">Click anywhere to skip intro</div>

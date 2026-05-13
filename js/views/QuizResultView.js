@@ -87,8 +87,8 @@ export default class QuizResultView extends AbstractView {
         .massive-score {
             font-size: clamp(5rem, 15vw, 8rem);
             font-weight: 800; letter-spacing: -0.04em;
+            --gradient-fallback: #FFFFFF;
             background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.6) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-variant-numeric: tabular-nums;
         }
 
@@ -304,7 +304,7 @@ export default class QuizResultView extends AbstractView {
               </div>
               
               <div class="massive-score-row">
-                  <div class="massive-score">${scorePercent}</div>
+                  <div class="massive-score gradient-text">${scorePercent}</div>
                   <div class="score-symbol">%</div>
               </div>
               
