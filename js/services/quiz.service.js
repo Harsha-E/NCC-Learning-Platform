@@ -7,10 +7,10 @@ class QuizService {
    * @param {string} certificate - The cadet's certificate (e.g., 'A', 'B', 'C').
    * @returns {Promise<Array>} A flat list of available quiz objects.
    */
-  async getAvailableQuizzes(certificate) {
+  async getAvailableQuizzes(certificate, wing) {
     try {
       // 1. Fetch all modules for the current certificate
-      const modules = await ContentService.getModules(certificate);
+      const modules = await ContentService.getModules(certificate, wing);
       const allQuizzes = [];
 
       // 2. Iterate through modules to find chapters (which serve as quiz topics)

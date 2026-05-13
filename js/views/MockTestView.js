@@ -115,14 +115,29 @@ export default class MockTestView extends AbstractView {
       const wing = profile.wing || 'army';
 
       try {
+          // 1. Fetch Admin Blueprint Settings
           const db = getDbInstance();
           const snap = await getDoc(doc(db, 'metadata', `mockBlueprint_${cert}_${wing}`));
-          
-          if (snap.exists() && snap.data().settings) {
-              this.blueprintSettings = snap.data().settings;
+          if (snap.exists()) this.blueprintSettings = snap.data().settings;
+
+          // 2. Cross-check against actual available question pool in cache
+          const modules = await ContentService.getModules(cert, wing);
+          let totalAvailable = 0;
+          for (const mod of modules) {
+              const chapters = await ContentService.getChapters(cert, mod.id);
+              for (const chap of chapters) {
+                  const chapData = await ContentService.getChapter(cert, mod.id, chap.id);
+                  if (chapData?.assessmentData) {
+                      totalAvailable += chapData.assessmentData.filter(q => q.type === 'mcq').length;
+                  }
+              }
           }
+
+          // 3. Automatically adjust display count if pool is smaller than 75
+          this.blueprintSettings.totalQuestions = Math.min(this.blueprintSettings.totalQuestions, totalAvailable);
+          
       } catch (e) {
-          console.warn("Failed to fetch mock blueprint, falling back to defaults.", e);
+          console.warn("Briefing calculation error:", e);
       }
 
       this.renderBriefing();

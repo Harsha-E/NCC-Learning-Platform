@@ -174,7 +174,7 @@ export default class ModuleView extends AbstractView {
     try {
       // Parallel fetch via strictly managed cache/services
       const [moduleData, chapters, moduleProgress] = await Promise.all([
-        ContentService.getModule(profile.certificate || 'A', this.moduleId),
+        ContentService.getModule(profile.certificate || 'A', this.moduleId, profile.wing || 'army'),
         ContentService.getChapters(profile.certificate || 'A', this.moduleId),
         ProgressService.getModuleProgress(user.uid, this.moduleId)
       ]);

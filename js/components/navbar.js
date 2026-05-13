@@ -40,7 +40,7 @@ class NavbarComponent {
                 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
                 .nav-links { display: flex; align-items: center; gap: 0.25rem; background: rgba(0, 0, 0, 0.4); padding: 0.35rem; border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.05); }
-                .nav-item { position: relative; padding: 0.6rem 1.25rem; color: #8E8E93; text-decoration: none; font-size: 0.85rem; font-weight: 700; border-radius: 50px; transition: 0.3s ease; z-index: 1; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+                .nav-item { position: relative; padding: 0.6rem 1.25rem; color: #B7BCC4; text-decoration: none; font-size: 0.85rem; font-weight: 700; border-radius: 50px; transition: 0.3s ease; z-index: 1; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
                 .nav-item:hover { color: #FFFFFF; }
                 .nav-item.active { color: #0A84FF; text-shadow: 0 0 15px rgba(10,132,255,0.4); }
                 .nav-item.active::before { content: ''; position: absolute; inset: 0; background: rgba(10, 132, 255, 0.1); border-radius: 50px; z-index: -1; border: 1px solid rgba(10, 132, 255, 0.2); }
@@ -64,14 +64,14 @@ class NavbarComponent {
                     min-height: 44px !important;
                     aspect-ratio: 1 / 1 !important;
                     border-radius: 50% !important; 
-                    background: rgba(255,255,255,0.9);
+                    background: rgba(15, 20, 25, 0.92);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     flex-shrink: 0 !important;
                     padding: 0 !important;
-                    color: #EBEBF5;
+                    color: #F8FAFC;
                     transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .icon-btn:hover { border-color: #0A84FF; color: #0A84FF; transform: scale(1.05) translateY(-2px); box-shadow: 0 5px 15px rgba(10,132,255,0.2); }
@@ -86,7 +86,7 @@ class NavbarComponent {
                 
                 /* --- MOBILE DOCK --- */
                 .mobile-dock { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 9000; background: rgba(15, 20, 25, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; padding: 0.5rem; gap: 0.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-                .dock-item { width: 50px; height: 50px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8E8E93; text-decoration: none; transition: 0.3s; position: relative; }
+                .dock-item { width: 50px; height: 50px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #B7BCC4; text-decoration: none; transition: 0.3s; position: relative; }
                 .dock-item:hover { color: #FFF; background: rgba(255,255,255,0.05); }
                 .dock-item.active { color: #0A84FF; background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.2); box-shadow: 0 0 15px rgba(10,132,255,0.3); }
                 .dock-item svg { width: 22px; height: 22px; }
@@ -98,7 +98,7 @@ class NavbarComponent {
                 .logout-overlay.active .logout-card { transform: scale(1); }
                 .logout-icon { width: 64px; height: 64px; background: rgba(255,69,58,0.15); color: #FF453A; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; box-shadow: 0 0 20px rgba(255,69,58,0.2); }
                 .logout-title { font-size: 1.5rem; font-weight: 800; color: #FFF; margin: 0 0 0.5rem 0; }
-                .logout-desc { color: #8E8E93; font-size: 0.95rem; margin: 0 0 2rem 0; line-height: 1.5; }
+                .logout-desc { color: #B7BCC4; font-size: 0.95rem; margin: 0 0 2rem 0; line-height: 1.5; }
                 .logout-actions { display: flex; gap: 1rem; }
                 .modal-btn { flex: 1; padding: 1rem; border-radius: 50px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; border: none; text-transform: uppercase; }
                 .btn-cancel { background: rgba(255,255,255,0.05); color: #FFF; border: 1px solid rgba(255,255,255,0.1); }

@@ -22,12 +22,17 @@ export default class ForgotPasswordView extends AbstractView {
             --radius-md: 12px;
         }
 
+        body, #app-root {
+            background: var(--bg-abyss);
+            min-height: 100dvh;
+        }
+
         .auth-viewport {
-            min-height: 100dvh; background-color: var(--bg-abyss);
+            min-height: 100dvh; width: 100%; background-color: var(--bg-abyss);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 8.5rem 1.5rem 6.5rem 1.5rem !important; box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            position: relative; overflow: hidden;
+            position: relative; overflow: hidden; isolation: isolate;
         }
 
         /* Background Grid Illusion */

@@ -1,6 +1,6 @@
 import AbstractView from '../core/AbstractView.js';
 import AuthService from '../services/auth.service.js';
-import Toast from '../components/toast.js';
+import Router from '../core/router.js';
 
 export default class LoginView extends AbstractView {
   constructor(params) {
@@ -26,13 +26,32 @@ export default class LoginView extends AbstractView {
             --spring-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        body, #app-root {
+            background: var(--bg-abyss);
+            min-height: 100dvh;
+        }
+
         .hud-viewport {
-            min-height: calc(100vh - 4.5rem);
+            min-height: 100dvh;
+            width: 100%;
             background-color: var(--bg-abyss);
             display: flex; align-items: center; justify-content: center;
             padding: 8rem 1.5rem 2rem 1.5rem; box-sizing: border-box; position: relative;
             font-family: "JetBrains Mono", "SF Pro Display", monospace; /* Terminal vibe */
             overflow: hidden;
+            isolation: isolate;
+        }
+
+        .hud-viewport::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+              radial-gradient(circle at 20% 20%, rgba(10, 132, 255, 0.16), transparent 35%),
+              radial-gradient(circle at 80% 10%, rgba(48, 209, 88, 0.12), transparent 30%),
+              radial-gradient(circle at 50% 85%, rgba(10, 132, 255, 0.1), transparent 40%);
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* 2D Radar Canvas Background */
@@ -160,7 +179,7 @@ export default class LoginView extends AbstractView {
         .bio-text { color: var(--hud-primary); font-size: 0.8rem; letter-spacing: 4px; text-transform: uppercase; animation: blink 1s infinite; }
 
         @media (max-width: 480px) {
-            .hud-card { padding: 2.5rem 1.5rem; border: none; background: transparent; box-shadow: none;}
+            .hud-card { padding: 2.5rem 1.5rem; background: rgba(10, 20, 30, 0.82); box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45); }
             .hud-card::before, .hud-card::after { display: none; }
         }
 
@@ -249,8 +268,7 @@ export default class LoginView extends AbstractView {
         btn.onclick = (e) => {
             e.preventDefault();
             const route = btn.getAttribute('href');
-            if (route) window.history.pushState(null, null, route);
-            window.dispatchEvent(new Event('popstate'));
+            if (route) Router.navigateTo(route);
         };
     });
 

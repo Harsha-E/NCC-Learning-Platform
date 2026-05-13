@@ -2,7 +2,7 @@
   "name": "NCC Cadet Learning Platform",
   "short_name": "NCC Learning",
   "description": "Learning Management System for NCC Cadets",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#FF9933",
@@ -24,6 +24,6 @@
   "categories": ["education", "business"],
   "lang": "en-IN",
   "dir": "ltr",
-  "scope": "/",
+  "scope": "./",
   "prefer_related_applications": false
 }

@@ -43,8 +43,9 @@ export default class ChapterView extends AbstractView {
 
         .reader-layout::after {
             content: ""; position: fixed; inset: 0; pointer-events: none;
-            background-image: url('assets/images/film-grain.png'); 
-            opacity: 0.03; z-index: 9999; mix-blend-mode: overlay;
+            background-image: radial-gradient(rgba(255,255,255,0.08) 0.7px, transparent 0.7px);
+            background-size: 4px 4px;
+            opacity: 0.04; z-index: 9999; mix-blend-mode: overlay;
         }
 
         /* --- THE GLASS BLADE PROGRESS BAR --- */

@@ -198,8 +198,7 @@ export default class HomeView extends AbstractView {
               const route = btn.getAttribute('href');
               if (route) {
                   this.destroy(); 
-                  window.history.pushState(null, null, route);
-                  window.dispatchEvent(new Event('popstate'));
+                  Router.navigateTo(route);
               }
           };
       });

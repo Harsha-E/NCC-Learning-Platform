@@ -294,6 +294,7 @@ export default class QuizResultView extends AbstractView {
       
       const incorrectCount = totalQs - rawCorrect;
       const avgTime = this.resultData.avgTime ? `${this.resultData.avgTime}s` : 'N/A';
+      const retryRoute = `./quiz?module=${this.params?.queryParams?.module || ''}&chapter=${this.params?.queryParams?.chapter || ''}`;
 
       let html = `
           <div class="hero-section">
@@ -388,7 +389,7 @@ export default class QuizResultView extends AbstractView {
       html += `
           <div class="action-dock">
               <a href="${this.nextRoute}" class="btn btn-primary" data-nav>${this.nextText}</a>
-              ${!isPass && this.examType !== 'mock' ? `<button class="btn btn-ghost" onclick="window.history.back()">Re-Attempt Protocol</button>` : ''}
+              ${!isPass && this.examType !== 'mock' ? `<a href="${retryRoute}" class="btn btn-ghost" data-nav>Re-Attempt Protocol</a>` : ''}
           </div>
       `;
 

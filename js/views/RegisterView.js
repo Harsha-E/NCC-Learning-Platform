@@ -27,8 +27,14 @@ export default class RegisterView extends AbstractView {
             --spring-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        body, #app-root {
+            background: var(--bg-abyss);
+            min-height: 100dvh;
+        }
+
         .hud-viewport {
             min-height: 100dvh;
+            width: 100%;
             background-color: var(--bg-abyss);
             display: flex; 
             flex-direction: column;
@@ -43,6 +49,19 @@ export default class RegisterView extends AbstractView {
             font-family: "JetBrains Mono", "SF Pro Display", monospace;
             overflow-x: hidden;
             overflow-y: auto;
+            isolation: isolate;
+        }
+
+        .hud-viewport::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+              radial-gradient(circle at 15% 18%, rgba(10, 132, 255, 0.16), transparent 34%),
+              radial-gradient(circle at 85% 15%, rgba(48, 209, 88, 0.12), transparent 28%),
+              radial-gradient(circle at 50% 88%, rgba(255, 159, 10, 0.08), transparent 38%);
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* 2D Radar Canvas Background */
@@ -199,7 +218,7 @@ export default class RegisterView extends AbstractView {
 
         @media (max-width: 600px) {
             .hud-viewport { padding-top: 5.5rem; }
-            .hud-card { padding: 2.5rem 1.5rem; border: none; background: transparent; box-shadow: none; margin-top: 0;}
+            .hud-card { padding: 2.5rem 1.5rem; background: rgba(10, 20, 30, 0.84); box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45); margin-top: 0;}
             .hud-card::before, .hud-card::after { display: none; }
             .sys-status { position: static; justify-content: center; margin-bottom: 1rem; }
             .auth-title { font-size: 1.8rem; }
@@ -541,8 +560,7 @@ export default class RegisterView extends AbstractView {
         );
         
         if (typeof AuthService.logout === 'function') await AuthService.logout();
-        window.history.pushState(null, null, '/login');
-        window.dispatchEvent(new Event('popstate'));
+        Router.navigateTo('/login');
       } catch (error) {
         console.error('[RegisterView] Auth Error:', error);
         

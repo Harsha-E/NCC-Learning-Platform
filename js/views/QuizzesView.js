@@ -157,8 +157,10 @@ export default class QuizzesView extends AbstractView {
         const profile = Store.get('profile') || {};
         const safeCert = String(profile.certificate || 'A').toUpperCase();
 
+        const safeWing = String(profile.wing || 'army').toLowerCase();
+
         const [availableQuizzes, userProgress] = await Promise.all([
-            QuizService.getAvailableQuizzes(safeCert),
+            QuizService.getAvailableQuizzes(safeCert, safeWing),
             ProgressService.getUserProgress(user.uid)
         ]);
 
