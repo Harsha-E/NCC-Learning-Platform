@@ -98,22 +98,6 @@ h4 { font-size: var(--text-xl); }
 h5 { font-size: var(--text-lg); }
 h6 { font-size: var(--text-base); }
 
-/* Gradient text utility with a readable fallback for hosts/browsers
-   that don't preserve background-clipped text exactly the same way. */
-.gradient-text {
-  display: inline-block;
-  color: var(--gradient-fallback, #ffffff) !important;
-}
-
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .gradient-text {
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    color: transparent !important;
-  }
-}
-
 p {
   margin-bottom: var(--space-4);
 }
