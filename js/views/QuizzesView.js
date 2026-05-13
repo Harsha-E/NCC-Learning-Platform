@@ -55,7 +55,7 @@ export default class QuizzesView extends AbstractView {
             background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); 
             margin-bottom: 1rem; 
         }
-        .header-title { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 800; margin: 0 0 0.75rem 0; letter-spacing: -0.03em; }
+        .header-title { color: #F8FAFC;font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 800; margin: 0 0 0.75rem 0; letter-spacing: -0.03em; }
         .header-desc { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; line-height: 1.5; }
 
         /* STRICT VERTICAL LIST LAYOUT */

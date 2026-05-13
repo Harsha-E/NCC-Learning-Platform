@@ -78,6 +78,7 @@ class NavbarComponent {
                 .icon-btn.logout:hover { border-color: #FF453A; color: #FF453A; box-shadow: 0 5px 15px rgba(255,69,58,0.2); }
                 
                 .nav-icon { 
+                    
                     width: 20px !important; 
                     height: 20px !important; 
                     stroke-width: 2.5; 
@@ -111,7 +112,7 @@ class NavbarComponent {
                     .nav-brand span { display: none; }
                     .nav-links { display: none; }
                     .nav-actions { margin-left: auto !important; width: auto !important; }
-                    .icon-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; }
+                    .icon-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; color: #F8FAFC;}
                     .mobile-dock { display: flex; }
                 }
             `;
@@ -165,10 +166,10 @@ class NavbarComponent {
                     <div class="nav-actions">
                         ${!isAdmin ? `
                         <a href="/profile" class="icon-btn" data-nav title="Profile">
-                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <svg class="nav-icon" stroke="white" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         </a>` : ''}
                         <button id="navLogoutBtn" class="icon-btn logout" title="Logout">
-                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <svg class="nav-icon" stroke="white" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         </button>
                     </div>
                 </nav>

@@ -45,6 +45,7 @@ export default class DashboardView extends AbstractView {
 
         .hero-header { margin-bottom: 3rem; animation: fadeInDown 0.6s ease-out; }
         .hero-header h1 { 
+            color: #F8FAFC;
             font-size: clamp(2.2rem, 5vw, 3rem);
             font-weight: 800; letter-spacing: -0.03em; margin: 0; line-height: 1.1; 
         }
@@ -88,7 +89,7 @@ export default class DashboardView extends AbstractView {
             margin-bottom: 1.5rem; /* Space between banner and mock card */
         }
         
-        .action-banner-text h2 { margin: 0 0 0.5rem 0; font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; letter-spacing: -0.01em; }
+        .action-banner-text h2 { color: #F8FAFC;margin: 0 0 0.5rem 0; font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; letter-spacing: -0.01em; }
         .action-banner-text p { color: rgba(255,255,255,0.7); margin: 0; font-size: 1rem; line-height: 1.5; }
 
         .action-buttons { display: flex; gap: 1rem; }
@@ -103,7 +104,7 @@ export default class DashboardView extends AbstractView {
         .btn-primary { background: var(--text-main); color: var(--bg-base); box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
         .btn-primary:hover { background: #EBEBF5; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.2); }
         .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid rgba(255,255,255,0.15); }
-        .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+        .btn-ghost:hover { color: #F8FAFC; background: rgba(255,255,255,0.20); }
 
         /* AWWWARDS-STYLE FINAL SIMULATION CARD */
         .premium-mock-card {

@@ -95,7 +95,7 @@ export default class HomeView extends AbstractView {
             margin-bottom: 2rem; background: rgba(255, 153, 51, 0.05); backdrop-filter: blur(10px);
         }
         
-        .hero-title { font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; }
+        .hero-title { color: var(--text-pure); font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; }
         .hero-sub { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 3rem 0; max-width: 500px; }
 
         .hero-actions { display: flex; gap: 1rem; justify-content: flex-start; }
@@ -122,7 +122,7 @@ export default class HomeView extends AbstractView {
         
         .b-icon { width: 56px; height: 56px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); color: var(--text-pure); border: 1px solid var(--border-glass); }
         .b-text { flex: 1; }
-        .b-title { font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; letter-spacing: -0.01em; }
+        .b-title { font-size: 1.15rem;color: var(--text-pure);font-weight: 700; margin: 0 0 0.5rem 0; letter-spacing: -0.01em; }
         .b-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin: 0; }
 
         @media (max-width: 1024px) {
