@@ -281,7 +281,7 @@ export default class RegisterView extends AbstractView {
             <div class="step-content" data-step="2">
               <div class="input-group">
                 <label class="input-label" for="serviceNumber">Service Number</label>
-                <input type="text" id="serviceNumber" class="hud-input" placeholder="> e.g. AP21SDA" required style="text-transform: uppercase;">
+                <input type="text" id="serviceNumber" class="hud-input" placeholder="> e.g. AP2024SWIA0150219" required style="text-transform: uppercase;">
               </div>
               <div class="btn-row">
                 <button type="button" class="btn-submit btn-ghost btn-prev">Back</button>
@@ -436,7 +436,7 @@ export default class RegisterView extends AbstractView {
           if (!firstInvalidInput) firstInvalidInput = input;
           isValid = false;
         }
-        if (input.id === 'serviceNumber' && !/^[a-zA-Z0-9]{6}$/.test(input.value.trim())) {
+        if (input.id === 'serviceNumber' && !/^AP\d{4}(SD|SW)[A-Z]{2}\d{7}$/.test(input.value.trim())) {
           triggerError(input);
           if (!firstInvalidInput) firstInvalidInput = input;
           isValid = false;
@@ -535,6 +535,10 @@ export default class RegisterView extends AbstractView {
 
     [fullNameInput, serviceNumberInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(inp => {
       inp.addEventListener('input', () => inp.classList.remove('error', 'success'));
+    });
+
+    serviceNumberInput.addEventListener('input', () => {
+      serviceNumberInput.value = serviceNumberInput.value.toUpperCase();
     });
 
     form.addEventListener('submit', async (e) => {

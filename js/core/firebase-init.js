@@ -42,14 +42,14 @@ import {
 
 // Firebase Configuration - Replace with your project config
 const firebaseConfig = {
-  apiKey: "AIzaSyBDhUcT_-0LLI5bM3MARRPCNy5XqUJb3OU",
-  authDomain: "ncc-1945.firebaseapp.com",
-  projectId: "ncc-1945",
-  storageBucket: "ncc-1945.firebasestorage.app",
-  messagingSenderId: "581810935602",
-  appId: "1:581810935602:web:8cedf4d1109a7d401c292b"
+  apiKey: "AIzaSyCn_WXWKO1KJ-VF0CuxlHItDpWlqBb2H68",
+  authDomain: "ncc-cadet-platform.firebaseapp.com",
+  projectId: "ncc-cadet-platform",
+  storageBucket: "ncc-cadet-platform.firebasestorage.app",
+  messagingSenderId: "446822209995",
+  appId: "1:446822209995:web:2dc7ec4220301fb080be4e"
 };
-
+initializeApp(firebaseConfig);
 // Initialize Firebase
 let app, auth, db, storage, functions;
 
