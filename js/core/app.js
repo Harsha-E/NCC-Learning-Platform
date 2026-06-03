@@ -3,6 +3,12 @@ import Store from './store.js';
 import { onAuthChange, getDbInstance, getStorageInstance, doc, getDoc } from './firebase-init.js';
 import ProgressService from '../services/progress.service.js';
 import AuthService from '../services/auth.service.js';
+import ErrorService from '../services/ErrorService.js';
+import AnalyticsService from '../services/AnalyticsService.js';
+import GamificationService from '../services/GamificationService.js';
+import ToastManager from '../components/ToastManager.js';
+import RankPromotionModal from '../components/RankPromotionModal.js';
+import BackgroundManager from './BackgroundManager.js';
 
 // Expose globals for the React/External components if needed
 window.__FIREBASE_DB__ = getDbInstance();
@@ -11,6 +17,22 @@ window.__FIREBASE_STORAGE__ = getStorageInstance();
 const App = {
     async init() {
         console.log("🚀 Initializing NCC Command SPA...");
+        ErrorService.init();
+        AnalyticsService.init();
+        ToastManager.init();
+        RankPromotionModal.init();
+        BackgroundManager.init();
+
+        if (window.InstallGate && window.InstallGate.checkAndShowGate()) {
+            console.warn("🛑 App initialization blocked by Force-Install Gate.");
+            // We intentionally leave the loader running in the background while InstallGate renders over it.
+            // When InstallGate resolves, the page reloads.
+            setTimeout(() => {
+                const loader = document.getElementById('global-loader');
+                if (loader) loader.style.opacity = '0';
+            }, 2000);
+            return;
+        }
 
         // 1. Listen for Auth Changes
         onAuthChange(async (authData) => {
@@ -34,6 +56,8 @@ const App = {
                         Store.set('profile', profileSnap.data());
                     }
                     await ProgressService.getUserProgress(user.uid);
+                    await GamificationService.init();
+                    AnalyticsService.trackEvent('login', { uid: user.uid });
                 } catch (e) {
                     console.error("Auth hydration failed:", e);
                 }
@@ -48,34 +72,28 @@ const App = {
                 this.stopWriteGuard();
             }
 
-            // 4. Initialize Router
-            if (!this.isAppReady) {
-                this.isAppReady = true;
-                await Router.init();
+        // 4. Initialize Router
+        if (!this.isAppReady) {
+            this.isAppReady = true;
+            await Router.init();
+            
+            // Ensure loader displays for at least 2.0s so it doesn't flash
+            const elapsed = Date.now() - window.__APP_START_TIME__;
+            const remainingDelay = Math.max(0, 2000 - elapsed);
+            
+            setTimeout(() => {
                 const loader = document.getElementById('global-loader');
-                if (loader) {
+                // Only hide if there wasn't a fatal syntax error caught
+                if (loader && !window.__HAS_ERROR__) {
                     loader.style.opacity = '0';
                     setTimeout(() => loader.remove(), 400);
                 }
                 document.body.style.overflow = 'auto';
-            } else {
-                await Router.navigate();
-            }
+            }, remainingDelay);
+        } else {
+            await Router.navigate();
+        }
         });
-
-        // 5. Global Error Handling
-        window.onerror = (msg, url, line) => {
-            if (msg === "Script error." || msg.toString().includes("Script error")) return true;
-            console.error(`🚨 [Global Crash Captured]:\n ${msg}\n at ${url}:${line}`);
-        };
-        
-        window.onunhandledrejection = function (event) {
-            if (event.reason && event.reason.name === 'RenderingCancelledException') {
-                event.preventDefault();
-                return;
-            }
-            console.error('⚠️ [Unhandled Promise Rejection]:', event.reason);
-        };
     },
 
     startWriteGuard(uid) {

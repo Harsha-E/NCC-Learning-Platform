@@ -33,7 +33,7 @@ export default class MockTestView extends AbstractView {
         }
 
         .briefing-viewport {
-            min-height: 100dvh; background-color: var(--bg-abyss);
+            min-height: 100dvh; background-color: transparent;
             padding: 8.5rem 1.5rem 6.5rem 1.5rem !important; box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             color: var(--text-pure);
@@ -100,7 +100,28 @@ export default class MockTestView extends AbstractView {
               <div style="text-align: center; padding: 4rem;">
                   <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto;"></div>
                   <div style="color: var(--text-muted); font-weight: 600;">Decrypting Blueprint Parameters...</div>
-                  <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+                  <style>@keyframes spin { 100% { transform: rotate(360deg); } }
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+        }\n</style>
               </div>
           </div>
       </div>
@@ -117,24 +138,24 @@ export default class MockTestView extends AbstractView {
       try {
           // 1. Fetch Admin Blueprint Settings
           const db = getDbInstance();
-          const snap = await getDoc(doc(db, 'metadata', `mockBlueprint_${cert}_${wing}`));
+          const snap = await getDoc(doc(db, 'metadata', \`mockBlueprint_\${cert}_\${wing}\`));
           if (snap.exists()) this.blueprintSettings = snap.data().settings;
 
           // 2. Cross-check against actual available question pool in cache
-          const modules = await ContentService.getModules(cert, wing);
-          let totalAvailable = 0;
-          for (const mod of modules) {
-              const chapters = await ContentService.getChapters(cert, mod.id);
-              for (const chap of chapters) {
-                  const chapData = await ContentService.getChapter(cert, mod.id, chap.id);
-                  if (chapData?.assessmentData) {
-                      totalAvailable += chapData.assessmentData.filter(q => q.type === 'mcq').length;
-                  }
-              }
-          }
+          // const modules = await ContentService.getModules(cert, wing);
+          // let totalAvailable = 0;
+          // for (const mod of modules) {
+          //     const chapters = await ContentService.getChapters(cert, mod.id);
+          //     for (const chap of chapters) {
+          //         const chapData = await ContentService.getChapter(cert, mod.id, chap.id);
+          //         if (chapData?.assessmentData) {
+          //             totalAvailable += chapData.assessmentData.filter(q => q.type === 'mcq').length;
+          //         }
+          //     }
+          // }
 
           // 3. Automatically adjust display count if pool is smaller than 75
-          this.blueprintSettings.totalQuestions = Math.min(this.blueprintSettings.totalQuestions, totalAvailable);
+          // this.blueprintSettings.totalQuestions = Math.min(this.blueprintSettings.totalQuestions, totalAvailable);
           
       } catch (e) {
           console.warn("Briefing calculation error:", e);
@@ -146,7 +167,7 @@ export default class MockTestView extends AbstractView {
   renderBriefing() {
       const container = document.getElementById('briefingCard');
       
-      container.innerHTML = `
+      container.innerHTML = \`
           <div class="sys-badge">Mock Deployment Briefing</div>
           <h1 class="briefing-title">Final Simulation Protocol</h1>
           <p class="briefing-subtitle">Review your operational parameters before initiating the deployment sequence. Once commenced, the environment is strictly monitored.</p>
@@ -154,17 +175,17 @@ export default class MockTestView extends AbstractView {
           <div class="bento-grid">
               <div class="bento-box">
                   <span class="bento-label">Evaluation Scope</span>
-                  <div class="bento-val">${this.blueprintSettings.totalQuestions}</div>
+                  <div class="bento-val">\${this.blueprintSettings.totalQuestions}</div>
                   <span style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Questions</span>
               </div>
               <div class="bento-box">
                   <span class="bento-label">Time Limit</span>
-                  <div class="bento-val">${this.blueprintSettings.durationMins}<span style="font-size:1.2rem; color:var(--text-muted);">m</span></div>
+                  <div class="bento-val">\${this.blueprintSettings.durationMins}<span style="font-size:1.2rem; color:var(--text-muted);">m</span></div>
                   <span style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Maximum Duration</span>
               </div>
               <div class="bento-box">
                   <span class="bento-label">Passing Target</span>
-                  <div class="bento-val">${this.blueprintSettings.passPercentage}<span style="font-size:1.2rem; color:var(--text-muted);">%</span></div>
+                  <div class="bento-val">\${this.blueprintSettings.passPercentage}<span style="font-size:1.2rem; color:var(--text-muted);">%</span></div>
                   <span style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Minimum Accuracy</span>
               </div>
           </div>
@@ -183,7 +204,7 @@ export default class MockTestView extends AbstractView {
               <button class="btn btn-cancel" id="btnAbort">Abort</button>
               <button class="btn btn-launch" id="btnLaunch">Acknowledge & Launch</button>
           </div>
-      `;
+      \`;
 
       document.getElementById('btnAbort').onclick = () => {
           Router.navigateTo('/dashboard');

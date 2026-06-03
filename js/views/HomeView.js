@@ -95,8 +95,8 @@ export default class HomeView extends AbstractView {
             margin-bottom: 2rem; background: rgba(255, 153, 51, 0.05); backdrop-filter: blur(10px);
         }
         
-        .hero-title { color: var(--text-pure); font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; }
-        .hero-sub { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 3rem 0; max-width: 500px; }
+        .hero-title { color: var(--text-pure); font-size: clamp(3.5rem, 5.5vw, 6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1.5rem 0; text-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5), -1px -1px 0 rgba(0,0,0,0.2), 1px 1px 0 rgba(0,0,0,0.2); }
+        .hero-sub { font-size: 1.15rem; color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0 0 3rem 0; max-width: 500px; text-shadow: 0 4px 15px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.6); font-weight: 500; }
 
         .hero-actions { display: flex; gap: 1rem; justify-content: flex-start; }
         .btn { padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; border: none; text-decoration: none; display: inline-flex; align-items: center;}
@@ -145,44 +145,16 @@ export default class HomeView extends AbstractView {
               <h2 class="story-text" id="text-4">Aligned in formation.</h2>
               <h2 class="story-text" id="text-5">Forged by discipline.</h2>
           </div>
-          
-          <div class="skip-hint" id="skip-hint">Click anywhere to skip intro</div>
 
           <div class="ui-layer" id="ui-layer">
-              <div class="hero-header">
+              <div class="hero-header" style="max-width: 600px; margin: 0 auto; text-align: center;">
                   <div class="sys-badge">National Cadet Corps LMS</div>
                   <h1 class="hero-title">Master the<br>Curriculum.</h1>
-                  <p class="hero-sub">The definitive high-performance digital training platform. Study your modules, execute tactical assessments, and track your telemetry in real-time.</p>
+                  <p class="hero-sub" style="margin-left: auto; margin-right: auto;">The definitive high-performance digital training platform. Study your modules, execute tactical assessments, and track your telemetry in real-time.</p>
                   
-                  <div class="hero-actions">
+                  <div class="hero-actions" style="justify-content: center; flex-wrap: wrap;">
                       <a href="./register" class="btn btn-primary" data-nav>Register Here</a>
-                      <a href="./login" class="btn btn-ghost" data-nav>Access Contents! (Registered)</a>
-                  </div>
-              </div>
-
-              <div class="features-grid">
-                  <div class="bento-card">
-                      <div class="b-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-                      <div class="b-text">
-                          <h3 class="b-title">Structured Modules</h3>
-                          <p class="b-desc">Deeply formatted syllabi covering Map Reading, Weapon Training, and Field Craft.</p>
-                      </div>
-                  </div>
-                  <div class="bento-card">
-                      <div class="b-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-                      <div class="b-text">
-                          <h3 class="b-title">Live Telemetry</h3>
-                          <p class="b-desc">Monitor operational readiness with real-time progression matrices and accuracy tracking.</p>
-                      </div>
-                  </div>
-                  <div class="bento-card">
-                      <div class="b-icon">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                      </div>
-                      <div class="b-text">
-                          <h3 class="b-title">Field Deployment</h3>
-                          <p class="b-desc">Execute training protocols in zero-connectivity environments. Telemetry securely caches locally and syncs upon command uplink.</p>
-                      </div>
+                      <a href="./login" class="btn btn-ghost" data-nav>Access Contents</a>
                   </div>
               </div>
           </div>
@@ -202,10 +174,6 @@ export default class HomeView extends AbstractView {
               }
           };
       });
-
-      // Bind the skip listener securely to the window to ensure clicks are caught everywhere
-      this.clickListener = () => this.skipIntro();
-      window.addEventListener('click', this.clickListener);
 
       this.initCinematicEngine();
   }
@@ -252,8 +220,9 @@ export default class HomeView extends AbstractView {
               this.speedMod = Math.random() * 0.02 + 0.01;
               
               // Phase 3: Flag
-              const flagWidth = Math.min(width * 0.8, 800);
-              const flagHeight = Math.min(height * 0.5, 400);
+              // Maintain 3:2 aspect ratio so it doesn't stretch awkwardly on mobile
+              const flagWidth = Math.min(width * 0.85, 800);
+              const flagHeight = flagWidth * (2 / 3); 
               this.flagX = (Math.random() - 0.5) * flagWidth;
               this.flagY = (Math.random() - 0.5) * flagHeight;
               if (this.flagY < -flagHeight / 6) this.flagColor = '#FF9933';
@@ -459,57 +428,18 @@ export default class HomeView extends AbstractView {
           await playPhase(4, 'SPIRAL', 2500, 4200);
           await playPhase(5, 'GRID', 2500, 4200);
           
-          if (this.hasSkipped) return;
-          
           this.currentState = 'CONSTELLATION';
           const uiLayer = document.getElementById('ui-layer');
           if(uiLayer) uiLayer.classList.add('revealed');
-          
-          const hint = document.getElementById('skip-hint');
-          if(hint) hint.style.display = 'none';
-          
-          window.removeEventListener('click', this.clickListener);
       };
 
       runDirector();
   }
 
-  skipIntro() {
-      if (this.hasSkipped) return;
-      this.hasSkipped = true;
-      
-      // 1. Clear all timing queues immediately
-      this.timeouts.forEach(clearTimeout);
-      
-      // 2. Remove click listener
-      window.removeEventListener('click', this.clickListener);
-      
-      // 3. Purge narrative text
-      document.querySelectorAll('.story-text').forEach(t => { t.style.display = 'none'; });
-      const hint = document.getElementById('skip-hint');
-      if (hint) hint.style.display = 'none';
 
-      // 4. Force the state machine to the final phase immediately
-      this.currentState = 'CONSTELLATION';
-
-      // 5. Reveal the UI without the 2-second delay
-      const uiLayer = document.getElementById('ui-layer');
-      if(uiLayer) {
-          uiLayer.style.transitionDelay = '0s';
-          uiLayer.style.transitionDuration = '1s';
-          uiLayer.classList.add('revealed');
-      }
-
-      // 6. Dim the canvas so it sits properly behind the UI
-      const canvas = document.getElementById('story-canvas');
-      if(canvas) {
-          canvas.style.opacity = '0.35';
-      }
-  }
 
   async destroy() {
       if(this.engineId) cancelAnimationFrame(this.engineId);
       this.timeouts.forEach(clearTimeout);
-      window.removeEventListener('click', this.clickListener);
   }
 }

@@ -138,6 +138,28 @@ export default class ChapterView extends AbstractView {
             .reader-layout { padding-bottom: 6rem; } /* Clears the mobile dock */
             .page-nav-bar { bottom: 6.5rem !important; } /* Sits safely above the mobile dock */
         }
+      
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+        }
       </style>
 
       <div id="readingProgressContainer"><div id="readingProgress"></div></div>
@@ -178,6 +200,15 @@ export default class ChapterView extends AbstractView {
   }
 
   async mount() {
+    if (!this.moduleId || !this.chapterId) {
+      if (window.Router) {
+          window.Router.navigateTo('/learning');
+      } else {
+          window.location.hash = '#/learning';
+      }
+      return;
+    }
+
     const profile = Store.get('profile');
     if (!profile) return Router.navigateTo('./login');
 
@@ -189,7 +220,7 @@ export default class ChapterView extends AbstractView {
         this.pages = this.extractPages(data.contentHtml);
         
         document.getElementById('mainTitle').textContent = data.title;
-        document.getElementById('chapterBadge').textContent = `PHASE ${this.chapterId.split('_').pop()}`;
+        document.getElementById('chapterBadge').textContent = \`PHASE \${this.chapterId.split('_').pop()}\`;
         
         this.renderUI();
         this.renderPageContent();
@@ -206,7 +237,7 @@ export default class ChapterView extends AbstractView {
   renderUI() {
       const pageBar = document.getElementById('pageBar');
       if(pageBar) {
-          pageBar.innerHTML = this.pages.map((_, idx) => `<button class="page-tab" data-idx="${idx}"></button>`).join('');
+          pageBar.innerHTML = this.pages.map((_, idx) => \`<button class="page-tab" data-idx="\${idx}"></button>\`).join('');
           pageBar.querySelectorAll('.page-tab').forEach(btn => {
               btn.onclick = () => {
                   this.activePageIndex = parseInt(btn.dataset.idx);
@@ -241,7 +272,7 @@ export default class ChapterView extends AbstractView {
       if (total > this.highestScrollScored) {
           this.highestScrollScored = Math.min(total, 100);
           const bar = document.getElementById('readingProgress');
-          if (bar) bar.style.width = `${this.highestScrollScored}%`;
+          if (bar) bar.style.width = \`\${this.highestScrollScored}%\`;
           
           const user = Store.get('user');
           if (user) {
@@ -254,11 +285,11 @@ export default class ChapterView extends AbstractView {
       const modules = await ContentService.getModules(certId, wing);
       let html = '';
       for (const mod of modules) {
-          html += `<div style="color:#475569; font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; margin:1rem 0 0.5rem 0;">${mod.title}</div>`;
+          html += \`<div style="color:#475569; font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; margin:1rem 0 0.5rem 0;">\${mod.title}</div>\`;
           const chapters = await ContentService.getChapters(certId, mod.id);
           chapters.forEach(chap => {
               const isActive = (chap.id === this.chapterId && mod.id === this.moduleId) ? 'background:rgba(56,189,248,0.1); color:#38BDF8; font-weight:800; border-left:2px solid #38BDF8;' : '';
-              html += `<a href="./chapter?module=${mod.id}&chapter=${chap.id}" style="display:block; padding:8px 12px; color:#94A3B8; text-decoration:none; border-radius:6px; margin-bottom:2px; font-size:0.85rem; transition:0.2s; ${isActive}">${chap.title}</a>`;
+              html += \`<a href="./chapter?module=\${mod.id}&chapter=\${chap.id}" style="display:block; padding:8px 12px; color:#94A3B8; text-decoration:none; border-radius:6px; margin-bottom:2px; font-size:0.85rem; transition:0.2s; \${isActive}">\${chap.title}</a>\`;
           });
       }
       const el = document.getElementById('sidebarContent');
@@ -283,10 +314,10 @@ export default class ChapterView extends AbstractView {
       const actionArea = document.getElementById('footerActionArea');
       if (actionArea) {
           if (this.activePageIndex < this.pages.length - 1) {
-              actionArea.innerHTML = `<button style="background:#F8FAFC; color:#020617; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;" id="btnNextPageNative">Next Objective ▶</button>`;
+              actionArea.innerHTML = \`<button style="background:#F8FAFC; color:#020617; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;" id="btnNextPageNative">Next Objective ▶</button>\`;
               document.getElementById('btnNextPageNative').onclick = () => this.nextPage();
           } else {
-              actionArea.innerHTML = `<button id="btnTakeExam" style="background:linear-gradient(135deg, #10B981, #059669); color:white; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;">Initiate Assessment ✓</button>`;
+              actionArea.innerHTML = \`<button id="btnTakeExam" style="background:linear-gradient(135deg, #10B981, #059669); color:white; border:none; padding:0.8rem 1.8rem; border-radius:50px; font-weight:800; cursor:pointer; font-size:0.85rem;">Initiate Assessment ✓</button>\`;
               const btn = document.getElementById('btnTakeExam');
               if(btn) btn.onclick = (e) => this.startRipple(e);
           }
@@ -301,8 +332,8 @@ export default class ChapterView extends AbstractView {
       if(!ripple || !rippleText) return;
 
       const colors = ['#4338CA', '#BE185D', '#047857', '#6D28D9'];
-      ripple.style.left = `${e.clientX}px`;
-      ripple.style.top = `${e.clientY}px`;
+      ripple.style.left = \`\${e.clientX}px\`;
+      ripple.style.top = \`\${e.clientY}px\`;
       ripple.style.background = colors[Math.floor(Math.random() * colors.length)];
       
       document.getElementById('rippleChapterTitle').textContent = this.contentData.title;
@@ -315,7 +346,7 @@ export default class ChapterView extends AbstractView {
       }
       
       setTimeout(() => {
-          Router.navigateTo(`./quiz?module=${this.moduleId}&chapter=${this.chapterId}`);
+          Router.navigateTo(\`./quiz?module=\${this.moduleId}&chapter=\${this.chapterId}\`);
       }, 3100);
   }
 

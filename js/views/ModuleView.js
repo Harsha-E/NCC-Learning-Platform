@@ -91,12 +91,12 @@ export default class ModuleView extends AbstractView {
         .chapters-list { display: flex; flex-direction: column; gap: 1rem; }
         
         .chapter-card {
-          background: white; border: 1px solid #E0E0E0; border-radius: 16px;
+          background: rgba(255, 255, 255, 0.9); border: 1px solid #E0E0E0; border-radius: 16px;
           padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;
           transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
         .chapter-card:hover:not(.locked) {
-          transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); border-color: #FF9933;
+          border-color: #FF9933;
         }
         .chapter-card.locked { opacity: 0.6; filter: grayscale(100%); background: #F8F9FA; cursor: not-allowed; }
         
@@ -142,28 +142,20 @@ export default class ModuleView extends AbstractView {
       </style>
 
       <div class="module-container">
-        <div id="module-header-container">
-          <!-- Skeleton Loader -->
-          <div class="module-header-card" style="opacity: 0.7; animation: pulse 1.5s infinite;">
-            <div style="height: 20px; width: 100px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 1.5rem;"></div>
-            <div style="height: 40px; width: 60%; background: rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 1rem;"></div>
-            <div style="height: 20px; width: 80%; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 2rem;"></div>
-          </div>
-        </div>
-
+        <div id="module-header-container"></div>
         <h2 class="chapters-section-title">Curriculum Chapters</h2>
-        <div id="chapters-container" class="chapters-list">
-          <!-- Skeletons -->
-          <div class="chapter-card"><div class="chap-left"><div class="chap-number" style="background: #E0E0E0; color: transparent;">0</div><div style="height:20px; width:200px; background: #f0f0f0; border-radius:4px;"></div></div></div>
-          <div class="chapter-card"><div class="chap-left"><div class="chap-number" style="background: #E0E0E0; color: transparent;">0</div><div style="height:20px; width:150px; background: #f0f0f0; border-radius:4px;"></div></div></div>
-        </div>
+        <div id="chapters-container" class="chapters-list"></div>
       </div>
     `;
   }
 
   async mount() {
     if (!this.moduleId) {
-      this.renderError('Invalid Module ID specified in the URL.');
+      if (window.Router) {
+          window.Router.navigateTo('/learning');
+      } else {
+          window.location.hash = '#/learning';
+      }
       return;
     }
 
@@ -245,7 +237,7 @@ export default class ModuleView extends AbstractView {
       const isRead = myProgress?.completed;
 
       return `
-        <div class="chapter-card ${!isUnlocked ? 'locked' : isRead ? 'read' : ''}">
+        <div class="chapter-card tier-b ${!isUnlocked ? 'locked' : isRead ? 'read' : ''}">
           <div class="chap-left">
             <div class="chap-number">${isRead ? '✓' : (index + 1)}</div>
             <div class="chap-info">

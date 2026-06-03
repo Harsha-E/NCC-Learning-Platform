@@ -1,5 +1,6 @@
 import Store from '../core/store.js';
 import AuthService from '../services/auth.service.js';
+import NotificationService from '../services/NotificationService.js';
 
 class NavbarComponent {
     constructor() {
@@ -36,8 +37,9 @@ class NavbarComponent {
                 .aww-navbar.hidden { transform: translate(-50%, -150%); opacity: 0; }
 
                 .nav-brand { display: flex; align-items: center; gap: 10px; font-family: "JetBrains Mono", monospace; font-weight: 800; font-size: 1rem; color: #FFFFFF; letter-spacing: 1.5px; flex-shrink: 0; }
-                .brand-dot { width: 8px; height: 8px; background: #30D158; border-radius: 50%; box-shadow: 0 0 12px rgba(48, 209, 88, 0.8); animation: pulse-dot 2s infinite; flex-shrink: 0; }
-                @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+                .nav-brand-text { display: inline-block; }
+                .nav-brand-text-mobile { display: none; }
+                .brand-logo { width: 32px; height: 32px; flex-shrink: 0; filter: drop-shadow(0 0 10px rgba(10, 132, 255, 0.6)); }
 
                 .nav-links { display: flex; align-items: center; gap: 0.25rem; background: rgba(0, 0, 0, 0.4); padding: 0.35rem; border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.05); }
                 .nav-item { position: relative; padding: 0.6rem 1.25rem; color: #B7BCC4; text-decoration: none; font-size: 0.85rem; font-weight: 700; border-radius: 50px; transition: 0.3s ease; z-index: 1; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
@@ -107,9 +109,32 @@ class NavbarComponent {
                 .btn-confirm { background: #FF453A; color: #000; box-shadow: 0 4px 15px rgba(255,69,58,0.3); }
                 .btn-confirm:hover { background: #D70015; box-shadow: 0 8px 25px rgba(255,69,58,0.4); }
 
+                /* --- NOTIFICATION DRAWER --- */
+                .notif-drawer {
+                    position: fixed; top: 7rem; right: 2rem; width: 340px; max-height: 400px;
+                    background: rgba(15, 20, 25, 0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+                    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); z-index: 8900;
+                    display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+                    transform: translateY(-20px); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .notif-drawer.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+                .notif-header { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+                .notif-header h3 { margin: 0; font-size: 1.1rem; color: #FFF; font-weight: 700; }
+                .notif-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
+                .notif-item { padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.03); transition: 0.2s; cursor: pointer; display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid transparent; }
+                .notif-item:hover { background: rgba(255,255,255,0.08); }
+                .notif-item.unread { border-color: rgba(10,132,255,0.3); background: rgba(10,132,255,0.05); }
+                .notif-title { font-size: 0.9rem; font-weight: 700; color: #FFF; margin: 0; }
+                .notif-body { font-size: 0.8rem; color: #B7BCC4; margin: 0; line-height: 1.4; }
+                .notif-time { font-size: 0.7rem; color: rgba(255,255,255,0.4); align-self: flex-end; margin-top: 0.5rem; }
+                .notif-empty { text-align: center; padding: 2rem; color: #B7BCC4; font-size: 0.9rem; }
+
                 @media (max-width: 768px) {
                     .aww-navbar { top: 1rem; width: 94%; padding: 0.5rem 0.75rem; height: auto; }
-                    .nav-brand span { display: none; }
+                    /* Show app name on mobile */
+                    .nav-brand-text { display: none; }
+                    .nav-brand-text-mobile { display: inline-block; font-size: 1.1rem; }
                     .nav-links { display: none; }
                     .nav-actions { margin-left: auto !important; width: auto !important; }
                     .icon-btn { width: 40px !important; height: 40px !important; min-width: 40px !important; color: #F8FAFC;}
@@ -130,9 +155,10 @@ class NavbarComponent {
         const isActive = (path) => currentHash.includes(path) ? 'active' : '';
 
         let navHtml = '';
+        let isAdmin = false;
 
         if (user) {
-            const isAdmin = profile?.role === 'admin';
+            isAdmin = profile?.role === 'admin';
             let linksHtml = '';
             let mobileDockHtml = '';
 
@@ -150,21 +176,28 @@ class NavbarComponent {
                     <a href="/dashboard" class="nav-item ${isActive('/dashboard')}" data-nav>Dashboard</a>
                     <a href="/learning" class="nav-item ${isActive('/learning')}" data-nav>Curriculum</a>
                     <a href="/quizzes" class="nav-item ${isActive('/quizzes')}" data-nav>Telemetry</a>
+                    <a href="/mock-test" class="nav-item ${isActive('/mock-test')}" data-nav>Mock Exam</a>
+                    <a href="/leaderboard" class="nav-item ${isActive('/leaderboard')}" data-nav>Leaderboard</a>
                 `;
                 mobileDockHtml = `
                     <a href="/dashboard" class="dock-item ${isActive('/dashboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg></a>
                     <a href="/learning" class="dock-item ${isActive('/learning')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></a>
-                    <a href="/quizzes" class="dock-item ${isActive('/quizzes')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></a>
+                    <a href="/leaderboard" class="dock-item ${isActive('/leaderboard')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></a>
+                    <a href="/profile" class="dock-item ${isActive('/profile')}" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
                 `;
             }
 
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot"></div><span>NCC Learning Platform</span></div>
+                    <div class="nav-brand"><img src="./assets/branding/logo-primary.png" class="brand-logo" alt="Logo"><span class="nav-brand-text">NCC Learning Platform</span><span class="nav-brand-text-mobile">NCC Platform</span></div>
                     <div class="nav-links">${linksHtml}</div>
                     
                     <div class="nav-actions">
                         ${!isAdmin ? `
+                        <button class="icon-btn" id="navNotifBtn" title="Notifications" style="position:relative;">
+                            <svg class="nav-icon" stroke="white" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <span id="notifBadge" style="position:absolute; top:-2px; right:-2px; background:#0A84FF; color:white; font-size:10px; font-weight:700; width:16px; height:16px; border-radius:50%; display:none; align-items:center; justify-content:center;"></span>
+                        </button>
                         <a href="/profile" class="icon-btn" data-nav title="Profile">
                             <svg class="nav-icon" stroke="white" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         </a>` : ''}
@@ -186,12 +219,22 @@ class NavbarComponent {
                         </div>
                     </div>
                 </div>
+
+                <div class="notif-drawer" id="notifDrawer">
+                    <div class="notif-header">
+                        <h3>Comm Link</h3>
+                        <a href="/notifications" data-nav style="color: #0A84FF; font-size: 0.85rem; text-decoration: none; font-weight: 700; cursor: pointer;" id="notifViewAll">View All</a>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <div class="notif-empty">Syncing Telemetry...</div>
+                    </div>
+                </div>
             `;
         } else {
             // --- UPDATED GUEST VIEW WITH BOTH BUTTONS ---
             navHtml = `
                 <nav class="aww-navbar" id="global-nav">
-                    <div class="nav-brand"><div class="brand-dot" style="background:#0A84FF; box-shadow: 0 0 10px rgba(10,132,255,0.6);"></div><span>NCC Learning Platform</span></div>
+                    <div class="nav-brand"><img src="./assets/branding/logo-primary.png" class="brand-logo" alt="Logo"><span class="nav-brand-text">NCC Learning Platform</span><span class="nav-brand-text-mobile">NCC Platform</span></div>
                     <div class="nav-actions">
                         <a href="/login" class="nav-item ${isActive('/login')}" data-nav>Sign In</a>
                         <a href="/register" class="nav-item ${isActive('/register')}" data-nav style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2);">Register</a>
@@ -202,6 +245,71 @@ class NavbarComponent {
 
         this.navRoot.innerHTML = navHtml;
         this.bindLogoutEvents();
+        if (user && !isAdmin) this.initNotificationUI();
+    }
+
+    async initNotificationUI() {
+        const badge = document.getElementById('notifBadge');
+        const count = await NotificationService.getUnreadCount();
+        if (count > 0 && badge) {
+            badge.style.display = 'flex';
+            badge.innerText = count > 9 ? '9+' : count;
+        }
+
+        const notifBtn = document.getElementById('navNotifBtn');
+        const drawer = document.getElementById('notifDrawer');
+        if (!notifBtn || !drawer) return;
+
+        notifBtn.onclick = async () => {
+            drawer.classList.toggle('active');
+            if (drawer.classList.contains('active')) {
+                const list = document.getElementById('notifList');
+                const history = await NotificationService.getHistory();
+                
+                const viewAll = document.getElementById('notifViewAll');
+                if (viewAll) {
+                    viewAll.onclick = (e) => {
+                        e.preventDefault();
+                        drawer.classList.remove('active');
+                        if (window.Router) window.Router.navigateTo('/notifications');
+                    };
+                }
+                
+                if (history.length === 0) {
+                    list.innerHTML = `<div class="notif-empty">No incoming transmissions.</div>`;
+                    return;
+                }
+
+                list.innerHTML = history.map(n => `
+                    <div class="notif-item tier-b ${!n.read ? 'unread' : ''}" data-id="${n.id}">
+                        <h4 class="notif-title">${n.title}</h4>
+                        <p class="notif-body">${n.body}</p>
+                        <span class="notif-time">${new Date(n.timestamp).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+
+                // Bind read events
+                list.querySelectorAll('.notif-item.unread').forEach(item => {
+                    item.onclick = async () => {
+                        const id = Number(item.dataset.id);
+                        await NotificationService.markAsRead(id);
+                        item.classList.remove('unread');
+                        
+                        // update badge
+                        const c = await NotificationService.getUnreadCount();
+                        if (c === 0 && badge) badge.style.display = 'none';
+                        else if (badge) badge.innerText = c > 9 ? '9+' : c;
+                    };
+                });
+            }
+        };
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!notifBtn.contains(e.target) && !drawer.contains(e.target)) {
+                drawer.classList.remove('active');
+            }
+        });
     }
 
     bindEvents() {

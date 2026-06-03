@@ -1,179 +1,64 @@
-import { getDbInstance, doc, getDoc, writeBatch } from "../core/firebase-init.js";
+import { getDbInstance, doc, getDoc } from "../core/firebase-init.js";
 import Store from "../core/store.js";
 import ContentService from "./content.service.js";
-
-// ==========================================
-// UTILITY & SANITIZATION
-// ==========================================
-const isObject = (item) => {
-  return (item && typeof item === 'object' && !Array.isArray(item));
-};
-
-const deepMerge = (target, source) => {
-  let output = Object.assign({}, target);
-  if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach(key => {
-      if (isObject(source[key])) {
-        if (!(key in target)) {
-          Object.assign(output, { [key]: source[key] });
-        } else {
-          output[key] = deepMerge(target[key], source[key]);
-        }
-      } else {
-        Object.assign(output, { [key]: source[key] });
-      }
-    });
-  }
-  return output;
-};
-
-const sanitizePayload = (obj) => {
-  try {
-      return JSON.parse(JSON.stringify(obj));
-  } catch (e) {
-      console.warn("[ProgressService] Sanitization failed, returning raw object.");
-      return obj;
-  }
-};
-
-// ==========================================
-// OFFLINE-FIRST QUEUE DATABASE (IndexedDB)
-// ==========================================
-const initQueueDB = () => new Promise((resolve, reject) => {
-  const req = indexedDB.open('NCC_SyncQueue', 3);
-  
-  req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('progress')) {
-          db.createObjectStore('progress', { keyPath: 'path' });
-      }
-  };
-  
-  req.onsuccess = () => resolve(req.result);
-  
-  req.onerror = (e) => {
-      console.error("[ProgressService] Fatal DB Error:", req.error);
-      reject(req.error);
-  };
-  
-  req.onblocked = () => {
-      console.warn("[ProgressService] IndexedDB is blocked. Bypassing.");
-      reject(new Error("DB Blocked"));
-  };
-});
-
-const persistToQueue = async (path, data) => {
-  try {
-      const db = await initQueueDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction('progress', 'readwrite');
-        const store = tx.objectStore('progress');
-        const req = store.get(path);
-        
-        req.onsuccess = () => {
-          const existing = req.result || { path, data: {} };
-          existing.data = deepMerge(existing.data, data);
-          const putReq = store.put(existing);
-          putReq.onsuccess = () => resolve();
-          putReq.onerror = () => reject(putReq.error);
-        };
-        
-        req.onerror = () => reject(req.error);
-      });
-  } catch (err) {
-      console.warn("[ProgressService] Persist bypassed. Moving to local memory.");
-  }
-};
-
-let debounceTimeout = null;
+import db from "./DexieStore.js";
+import { SyncEngine } from "./SyncEngine.js";
+import AnalyticsService from "./AnalyticsService.js";
 
 // ==========================================
 // PROGRESS SERVICE CORE
 // ==========================================
 export default class ProgressService {
   
-  static async queueWrite(path, data) {
-    // Race the database task against a 2 second timer to prevent UI freezes.
-    const timeout = new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const writeTask = async () => {
-        await persistToQueue(path, data);
-        
-        // PWA Background Sync Registration
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
-          try {
-            const reg = await navigator.serviceWorker.getRegistration();
-            if (reg && reg.sync) {
-                await reg.sync.register('sync-progress');
-            }
-          } catch (err) {}
-        }
-        
-        // If online, flush after 5 seconds of inactivity
-        if (navigator.onLine) {
-            if (debounceTimeout) clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => this.flushQueue(), 5000);
-        } else {
-            console.log("📶 [Offline Mode]: Progress saved securely to local queue.");
-        }
-    };
-
-    await Promise.race([writeTask(), timeout]);
-  }
-
-  static async flushQueue() {
-    // Prevent flushing if there is no internet
-    if (!navigator.onLine) return;
-
+  /**
+   * One-time Bootstrap to fetch data from Firestore and store it in Dexie.
+   * Call this ONCE during login.
+   */
+  static async syncUserProgress(uid) {
+    if (!uid || !navigator.onLine) return;
     try {
-      const db = await initQueueDB();
-      
-      const writes = await new Promise((resolve, reject) => {
-        const tx = db.transaction('progress', 'readonly');
-        const req = tx.objectStore('progress').getAll();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-
-      if (!writes || writes.length === 0) return;
-
       const firestore = getDbInstance();
-      const batch = writeBatch(firestore);
+      const snap = await getDoc(doc(firestore, 'progress', uid));
+      let data = snap.exists() ? snap.data() : { modules: {} };
       
-      writes.forEach(item => {
-        const cleanData = sanitizePayload(item.data);
-        batch.set(doc(firestore, item.path), cleanData, { merge: true });
+      await db.progress.put({
+          userId: uid,
+          lastUpdated: Date.now(),
+          data: data
       });
-
-      await batch.commit();
-
-      // Clear queue after successful cloud sync
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('progress', 'readwrite');
-        const req = tx.objectStore('progress').clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject();
-      });
-      
-      console.log(`☁️ [Cloud Sync] Flushed secure progress. (${writes.length} items updated)`);
+      console.log('✅ Local Dexie cache bootstrapped from Firestore.');
     } catch (e) {
-      console.warn('⚠️ [Sync] Flush delayed due to network instability. Will retry.');
+      console.error("Bootstrap sync failed:", e);
     }
   }
 
+  static async queueWrite(path, data) {
+    await SyncEngine.queueUp(path, data);
+  }
+
+  static async flushQueue() {
+    await SyncEngine.flushQueue();
+  }
+
+  /**
+   * 100% Dexie-Only Read. No Firestore fallbacks.
+   * Eliminates read spikes for 13,000 cadets.
+   */
   static async getUserProgress(uid) {
     if (!uid) return { modules: {} };
+    
     try {
-      const db = getDbInstance();
-      const snap = await getDoc(doc(db, 'progress', uid));
+      let localRecord = await db.progress.get(uid);
       
-      if (snap.exists()) {
-        const data = snap.data();
-        Store.set('userProgress', data);
-        return data;
+      if (!localRecord || !localRecord.data) {
+          // Absolute fallback, meaning bootstrap hasn't run yet.
+          localRecord = { userId: uid, data: { modules: {} } };
       }
-      return { modules: {} };
+      
+      Store.set('userProgress', localRecord.data);
+      return localRecord.data;
     } catch (error) {
+      console.warn("Progress Service Local Error:", error);
       return Store.get('userProgress') || { modules: {} };
     }
   }
@@ -222,6 +107,7 @@ export default class ProgressService {
 
       if (isCompleted && currentPercent < 90) {
           const profile = Store.get('profile') || {};
+          AnalyticsService.trackEvent('chapter_read', { moduleId, chapterId });
           await this.markChapterRead(uid, profile.certificate || 'A', moduleId, chapterId);
       }
     }
@@ -257,6 +143,12 @@ export default class ProgressService {
             } 
         };
         await this.queueWrite(`progress/${uid}`, payload);
+
+        if (overallPercent >= 100 && progress.modules[moduleId].chaptersCompleted === totalChapters && !progress.modules[moduleId].courseCompletedEventSent) {
+            progress.modules[moduleId].courseCompletedEventSent = true;
+            Store.set('userProgress', progress);
+            AnalyticsService.trackEvent('course_completed', { moduleId, certId });
+        }
     } catch (e) {}
   }
 
@@ -286,6 +178,10 @@ export default class ProgressService {
 
       progress.modules[moduleId].quizzes[chapterId] = newRecord;
       Store.set('userProgress', progress);
+      
+      if (isPassed && !existing.passed) {
+          AnalyticsService.trackEvent('quiz_passed', { moduleId, chapterId, score: resultData.score });
+      }
       
       const payload = { 
           modules: { 
@@ -337,24 +233,16 @@ export default class ProgressService {
 // ==========================================
 // SYSTEM EVENT LISTENERS (CRITICAL FOR OFFLINE PWA)
 // ==========================================
-
-// 1. Instantly flush queue the second the browser detects internet connection
 window.addEventListener('online', () => {
     console.log("📶 [Network] Connection restored. Initiating sync flush.");
     ProgressService.flushQueue();
 });
-
-// 2. Log when Cadet goes offline
 window.addEventListener('offline', () => {
     console.warn("📵 [Network] Connection lost. Entering Offline Mode.");
 });
-
-// 3. Flush queue if Cadet tries to close the tab
 window.addEventListener("beforeunload", () => {
     ProgressService.flushQueue();
 });
-
-// 4. Flush queue if Cadet minimizes the app on mobile
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
       ProgressService.flushQueue();

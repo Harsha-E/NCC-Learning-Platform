@@ -3,6 +3,7 @@ import Store from '../core/store.js';
 import ContentService from '../services/content.service.js';
 import ProgressService from '../services/progress.service.js';
 import Router from '../core/router.js';
+import HeroGeometric from '../components/HeroGeometric.js';
 
 export default class LearningView extends AbstractView {
   constructor(params) {
@@ -28,24 +29,26 @@ export default class LearningView extends AbstractView {
             --text-secondary: #EBEBF5; 
             --text-tertiary: rgba(235, 235, 245, 0.6);
             --accent-blue: #0A84FF; --accent-blue-glow: rgba(10, 132, 255, 0.2);
-            --border-subtle: rgba(255, 255, 255, 0.05);
-            --border-highlight: rgba(255, 255, 255, 0.12);
-            --radius-lg: 16px; --radius-md: 12px;
+            --accent-green: #30D158; --accent-green-glow: rgba(48, 209, 88, 0.15);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(255, 255, 255, 0.2);
+            --radius-lg: 20px; --radius-md: 12px;
             --spring-soft: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .dash-viewport {
-            background-color: var(--bg-base); color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            box-sizing: border-box; width: 100%; height: 100dvh;
-            overflow-y: auto; overflow-x: hidden;
-            padding-top: 8rem !important; /* Strict clearance for Navbar */
-            padding-bottom: 6rem !important; /* Strict clearance for Dock */
+            min-height: 100dvh;
+            background-color: transparent;
+            /* STRICT NAVBAR & DOCK CLEARANCE */
+            padding: 8rem 1.5rem 6.5rem 1.5rem !important; 
+            box-sizing: border-box;
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            position: relative;
+            z-index: 10;
         }
 
-        .dash-container { max-width: 860px; margin: 0 auto; width: 100%; padding: 0 1.5rem; position: relative; z-index: 2; }
-        .view-layer { transition: opacity 0.4s ease; }
-        .hidden-layer { display: none; }
+        .dash-container { max-width: 860px; margin: 0 auto; }
 
         @keyframes shimmer-flow { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
         .skeleton { background: #1C1C1E; background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.03) 20%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 80%, rgba(255,255,255,0) 100%); background-size: 800px 100%; animation: shimmer-flow 2s infinite linear; border-radius: var(--radius-lg); }
@@ -59,7 +62,7 @@ export default class LearningView extends AbstractView {
 
         .mod-card { 
             background: var(--bg-elevated); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); overflow: hidden; transition: var(--spring-soft); 
+            border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); overflow: visible; transition: var(--spring-soft); 
         }
         .mod-card.open { border-color: rgba(10, 132, 255, 0.4); background: var(--bg-card-active); }
 
@@ -103,27 +106,41 @@ export default class LearningView extends AbstractView {
             .chap-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
             .btn { width: 100%; justify-content: center; }
         }
-      </style>
+      
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+
+          .metrics-grid, .bento-grid, .stats-grid, .cards-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }\n</style>
 
       <div class="dash-viewport">
           <div class="dash-container">
-              <div id="skeletonLayer" class="view-layer">
-                  <div class="dash-header">
-                      <div class="skeleton" style="height: 16px; width: 120px; margin-bottom: 0.5rem;"></div>
-                      <div class="skeleton" style="height: 44px; width: 280px;"></div>
-                  </div>
-                  <div class="module-list">
-                      <div class="skeleton" style="height: 120px; width: 100%;"></div>
-                      <div class="skeleton" style="height: 120px; width: 100%;"></div>
-                  </div>
-              </div>
-              
-              <div id="dataLayer" class="view-layer hidden-layer">
+              <div id="dataLayer" class="view-layer">
                   <div id="curriculumContent"></div>
               </div>
           </div>
       </div>
-    `;
+    \`;
   }
 
   async mount() {
@@ -175,54 +192,59 @@ export default class LearningView extends AbstractView {
 
   renderReality() {
       const contentDiv = document.getElementById('curriculumContent');
-      let html = `
-          <div class="dash-header">
-              <div class="greeting-time">Training Matrix</div>
-              <h1 class="greeting-name">Curriculum</h1>
-          </div>
+      let html = \`
+          <div class="dash-header" id="learning-hero-container" style="padding:0; min-height: 250px; margin-bottom: 2.5rem; border-radius: var(--radius-lg); overflow: hidden;"></div>
           <div class="module-list">
-      `;
+      \`;
 
       this.curriculumTree.forEach(mod => {
           const isOpen = this.expandedModules.has(mod.id) ? 'open' : '';
           
-          let chapHtml = mod.chapters.map(chap => `
+          let chapHtml = mod.chapters.map(chap => \`
               <div class="chap-row">
                   <div class="chap-info">
-                      <div class="chap-title">${chap.title}</div>
+                      <div class="chap-title">\${chap.title}</div>
                       <div class="badge-container">
-                          <span class="badge ${chap.isRead ? 'read' : 'unread'}">${chap.isRead ? 'Complete' : 'Pending'}</span>
-                          ${chap.quizScore !== null ? `<span class="badge" style="background:rgba(10,132,255,0.1); color:var(--accent-blue);">Score: ${chap.quizScore}%</span>` : ''}
+                          <span class="badge \${chap.isRead ? 'read' : 'unread'}">\${chap.isRead ? 'Complete' : 'Pending'}</span>
+                          \${chap.quizScore !== null ? \`<span class="badge" style="background:rgba(10,132,255,0.1); color:var(--accent-blue);">Score: \${chap.quizScore}%</span>\` : ''}
                       </div>
                   </div>
-                  <a href="./chapter?module=${mod.id}&chapter=${chap.id}" class="btn ${chap.isRead ? 'btn-ghost' : 'btn-primary'}" data-nav>
-                      ${chap.isRead ? 'Review' : 'Start'}
+                  <a href="./chapter?module=\${mod.id}&chapter=\${chap.id}" class="btn \${chap.isRead ? 'btn-ghost' : 'btn-primary'}" data-nav>
+                      \${chap.isRead ? 'Review' : 'Start'}
                   </a>
               </div>
-          `).join('');
+          \`).join('');
 
-          html += `
-              <div class="mod-card ${isOpen}" id="mod-card-${mod.id}">
-                  <div class="mod-header" data-modid="${mod.id}">
+          html += \`
+              <div class="mod-card tier-a \${isOpen}" id="mod-card-\${mod.id}">
+                  <div class="mod-header" data-modid="\${mod.id}">
                       <div class="mod-header-content">
-                          <h2 class="mod-title">${mod.title}</h2>
+                          <h2 class="mod-title">\${mod.title}</h2>
                           <div class="mod-stats-row">
-                              <span>${mod.readCount}/${mod.chapters.length} Chapters</span>
+                              <span>\${mod.readCount}/\${mod.chapters.length} Chapters</span>
                               <span style="color:var(--border-highlight)">|</span>
-                              <span>${mod.percentComplete}% Complete</span>
+                              <span>\${mod.percentComplete}% Complete</span>
                           </div>
-                          <div class="prog-track"><div class="prog-fill" data-target-width="${mod.percentComplete}"></div></div>
+                          <div class="prog-track"><div class="prog-fill" data-target-width="\${mod.percentComplete}"></div></div>
                       </div>
                       <div class="mod-chevron">
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                       </div>
                   </div>
-                  <div class="mod-body-wrapper"><div class="mod-body-inner"><div class="chapter-list">${chapHtml}</div></div></div>
+                  <div class="mod-body-wrapper"><div class="mod-body-inner"><div class="chapter-list">\${chapHtml}</div></div></div>
               </div>
-          `;
+          \`;
       });
 
-      contentDiv.innerHTML = html + `</div>`;
+      contentDiv.innerHTML = html + \`</div>\`;
+      
+      this.bg = new HeroGeometric('learning-hero-container', {
+          title1: 'Training',
+          title2: 'Matrix',
+          description: 'Tactical curriculum and pending assessments.'
+      });
+      this.bg.mount();
+
       this.bindEvents();
       this.triggerPostRenderAnimations();
   }
@@ -231,7 +253,7 @@ export default class LearningView extends AbstractView {
       document.querySelectorAll('.mod-header').forEach(header => {
           header.onclick = () => {
               const modId = header.dataset.modid;
-              const card = document.getElementById(`mod-card-${modId}`);
+              const card = document.getElementById(\`mod-card-\${modId}\`);
               if (card.classList.contains('open')) {
                   card.classList.remove('open');
                   this.expandedModules.delete(modId);
@@ -254,9 +276,13 @@ export default class LearningView extends AbstractView {
 
   triggerPostRenderAnimations() {
       setTimeout(() => {
-          document.getElementById('skeletonLayer')?.classList.add('hidden-layer');
-          document.getElementById('dataLayer')?.classList.remove('hidden-layer');
-          
+          // Remount bg in the datalayer container since we overwrote the DOM
+          if (this.bg) {
+              this.bg.containerId = 'learning-hero-container';
+              this.bg.container = document.querySelector('#dataLayer #learning-hero-container');
+              this.bg.mount();
+          }
+
           // NESTED TIMEOUT ensures the progress bars animate after visibility change
           setTimeout(() => {
               document.querySelectorAll('.prog-fill').forEach(bar => {
@@ -264,5 +290,12 @@ export default class LearningView extends AbstractView {
               });
           }, 200);
       }, 500); 
+  }
+
+  async destroy() {
+      if (this.bg) {
+          this.bg.destroy();
+          this.bg = null;
+      }
   }
 }

@@ -69,7 +69,50 @@ export default class MockExamView extends AbstractView {
             .q-palette { width: 100%; height: 180px; border-left: none; border-top: 1px solid rgba(255,255,255,0.1); }
             .palette-grid { grid-template-columns: repeat(10, 1fr); }
         }
-      </style>
+      
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+
+          .options-grid { display: block !important; }
+          .options-grid .opt-btn, .options-grid .mcq-option {
+            width: 100% !important;
+            margin-bottom: 12px !important;
+          }
+          .sidebar-panel, .question-navigator {
+            order: 2 !important;
+            width: 100% !important;
+            position: relative !important;
+            bottom: auto !important;
+            transform: none !important;
+            border-radius: 8px !important;
+            margin-top: 24px !important;
+          }
+          .question-main-content, .active-question, .quiz-main {
+            order: 1 !important;
+          }
+          .mock-exam-layout, .exam-container {
+            display: flex !important;
+            flex-direction: column !important;
+          }
+        }\n</style>
 
       <div class="exam-layout">
           <div class="exam-header">

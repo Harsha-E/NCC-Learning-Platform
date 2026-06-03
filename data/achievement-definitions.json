@@ -1,0 +1,42 @@
+{
+    "season_1": {
+        "achievements": [
+            {
+                "id": "first_blood",
+                "title": "First Blood",
+                "description": "Complete your first chapter.",
+                "icon": "🎯",
+                "xpReward": 50,
+                "triggerType": "chapter_read",
+                "triggerCount": 1
+            },
+            {
+                "id": "sharpshooter",
+                "title": "Sharpshooter",
+                "description": "Pass 5 quizzes with 100% score.",
+                "icon": "🦅",
+                "xpReward": 250,
+                "triggerType": "quiz_perfect",
+                "triggerCount": 5
+            },
+            {
+                "id": "iron_discipline",
+                "title": "Iron Discipline",
+                "description": "Maintain a 7-day learning streak.",
+                "icon": "⚔️",
+                "xpReward": 500,
+                "triggerType": "streak_days",
+                "triggerCount": 7
+            },
+            {
+                "id": "course_master",
+                "title": "Course Master",
+                "description": "Complete an entire curriculum track.",
+                "icon": "🏅",
+                "xpReward": 1000,
+                "triggerType": "course_completed",
+                "triggerCount": 1
+            }
+        ]
+    }
+}

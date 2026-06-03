@@ -240,24 +240,194 @@ export default class QuizView extends AbstractView {
         @keyframes pulse-skel { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         .sk-anim { animation: pulse-skel 1.5s infinite; }
 
+            --accent-orange: #FF9F0A;
+            --accent-red: #FF453A;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        .quiz-viewport {
+            min-height: 100dvh;
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            
+            /* STRICT MOBILE SAFE ZONES */
+            padding: 8rem 1.5rem 6.5rem 1.5rem !important;
+            box-sizing: border-box;
+            
+            display: flex;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .question-panel {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .exam-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-glass); 
+            padding-bottom: 1.5rem; margin-bottom: 2rem;
+        }
+        .exam-title { font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+        
+        .timer-badge {
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.2);
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-family: "JetBrains Mono", monospace; font-size: 1.1rem; font-weight: 700;
+            color: var(--accent-green); display: flex; align-items: center; gap: 8px;
+            transition: 0.3s;
+        }
+        .timer-badge.warning { 
+            color: var(--accent-red); background: rgba(255, 69, 58, 0.1);
+            border-color: rgba(255, 69, 58, 0.3); animation: pulseTimer 1s infinite; 
+        }
+        @keyframes pulseTimer { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Floating Chapter Transition Animations */
+        #questionContainer {
+            flex: 1; display: flex; flex-direction: column;
+            transition: opacity 0.3s ease-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .question-meta {
+            color: var(--text-muted); font-weight: 700; margin-bottom: 1.5rem;
+            letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .q-counter { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border-glass); color: var(--text-main); }
+        .question-category { color: var(--accent-blue); }
+
+        .question-text { font-size: clamp(1.2rem, 3vw, 1.5rem); line-height: 1.5; margin-bottom: 2rem; font-weight: 600; letter-spacing: -0.01em; }
+
+        /* TOUCH-FRIENDLY OPTIONS */
+        .options-grid { display: flex; flex-direction: column; gap: 1rem; }
+        .option-card {
+            background: rgba(255,255,255,0.03); border: 2px solid transparent; border-radius: var(--radius-md);
+            padding: 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 1.25rem;
+            transition: 0.2s; font-size: 1.1rem; line-height: 1.4;
+        }
+        .option-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .option-card:active { transform: scale(0.98); }
+        .option-card.selected { border-color: var(--accent-blue); background: rgba(10, 132, 255, 0.1); }
+        
+        .option-letter {
+            width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-muted); transition: 0.2s;
+        }
+        .option-card.selected .option-letter { background: var(--accent-blue); color: white; }
+
+        .controls-row { margin-top: 3rem; display: flex; justify-content: space-between; }
+        .btn-nav {
+            padding: 1rem 2rem; border-radius: 50px; font-weight: 700; cursor: pointer; border: none;
+            background: rgba(255,255,255,0.08); color: var(--text-main); transition: 0.2s; font-size: 0.95rem;
+        }
+        .btn-nav:hover:not(:disabled) { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+        /* SIDEBAR PANEL */
+        .sidebar-panel {
+            width: 320px; background: var(--bg-elevated); border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg); display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .sidebar-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-glass); }
+        .sidebar-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
+
+        .grid-container {
+            padding: 2rem; display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; overflow-y: auto; flex: 1; align-content: start;
+        }
+        .grid-node {
+            aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; color: var(--text-muted); transition: 0.2s; border: 2px solid transparent;
+        }
+        .grid-node:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .grid-node.answered { background: rgba(48, 209, 88, 0.15); color: var(--accent-green); }
+        .grid-node.active { border-color: var(--accent-blue); color: var(--text-main); transform: scale(1.1); box-shadow: 0 5px 15px rgba(10, 132, 255, 0.3); }
+
+        .submit-area { padding: 1.5rem 2rem; border-top: 1px solid var(--border-glass); }
+        .btn-submit {
+            width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 800;
+            font-size: 1.05rem; color: #000; background: var(--accent-green); cursor: pointer; 
+            transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(48, 209, 88, 0.3); }
+        .btn-submit:active { transform: scale(0.96); }
+
+        /* MODALS & TOASTS */
+        .confirm-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s ease;
+        }
+        .confirm-modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .confirm-modal-card {
+            background: #1C1C1E; border: 1px solid var(--border-glass); border-radius: var(--radius-lg);
+            padding: 2.5rem; max-width: 400px; width: 90%; text-align: center;
+            transform: scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+        }
+        .confirm-modal-overlay.active .confirm-modal-card { transform: scale(1); }
+        
+        .modal-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .modal-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 12px; }
+        .modal-btn { padding: 1.1rem; border-radius: 50px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .modal-btn-cancel { background: rgba(255,255,255,0.08); color: var(--text-main); }
+        .modal-btn-cancel:hover { background: rgba(255,255,255,0.15); }
+        .modal-btn-confirm { background: var(--accent-green); color: #000; box-shadow: 0 4px 15px rgba(48, 209, 88, 0.2); }
+        .modal-btn-confirm:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(48, 209, 88, 0.4); }
+
+        .error-container { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; }
+        .error-container h2 { color:var(--accent-red); margin-bottom:1rem; font-size: 1.8rem; font-weight: 800; }
+
+        .recovery-toast {
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--text-main); color: #000; padding: 0.75rem 1.5rem; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 800; box-shadow: 0 10px 30px rgba(255,255,255,0.2);
+            z-index: 1000; animation: dropIn 0.5s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.5s 3s forwards;
+            pointer-events: none;
+        }
+        @keyframes dropIn { from { top: 0px; opacity: 0; } to { top: 100px; opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; } }
+
+        /* ==========================================================================
+           MOBILE RESPONSIVENESS OVERRIDES
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .quiz-viewport { flex-direction: column; padding-top: 6.5rem !important; gap: 1rem; }
+            .question-panel { padding: 1.5rem; border-radius: 20px; }
+            .sidebar-panel { width: 100%; border-radius: 20px; }
+            .grid-container { grid-template-columns: repeat(6, 1fr); padding: 1.5rem; }
+            .submit-area { padding: 1.5rem; }
+            .exam-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .timer-badge { width: 100%; justify-content: center; box-sizing: border-box; }
+            .controls-row { flex-direction: column; gap: 1rem; }
+            .btn-nav { width: 100%; text-align: center; }
+        }
+        
         .hidden-layer { display: none !important; opacity: 0; }
         .visible-layer { display: flex !important; animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       </style>
 
-      <div class="quiz-viewport" id="quizSkeletonLayer">
-          <div class="question-panel">
-              <div class="sk-header-row sk-anim"><div class="sk-title"></div><div class="sk-timer"></div></div>
-              <div class="sk-q-tag sk-anim"></div><div class="sk-q-text sk-anim"></div>
-              <div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div><div class="sk-opt sk-anim"></div>
-          </div>
-          <div class="sidebar-panel">
-              <div class="sidebar-header"><div class="sk-title sk-anim" style="height: 20px;"></div></div>
-              <div class="sk-sb-grid">${'<div class="sk-node sk-anim"></div>'.repeat(16)}</div>
-          </div>
-      </div>
-
-      <div class="quiz-viewport hidden-layer" id="quizLayoutContainer"></div>
+      <div class="quiz-viewport" id="quizLayoutContainer"></div>
     `;
   }
 
@@ -280,12 +450,16 @@ export default class QuizView extends AbstractView {
 
   async mount() {
     if (!this.moduleId || !this.chapterId) {
-      Router.navigateTo('./dashboard');
+      if (window.Router) {
+          window.Router.navigateTo('/learning');
+      } else {
+          window.location.hash = '#/learning';
+      }
       return;
     }
 
     const profile = Store.get('profile');
-    if (!profile) return;
+    if (!profile) return window.Router ? window.Router.navigateTo('/login') : window.location.hash = '#/login';
 
     try {
         const chapterData = await ContentService.getChapter(profile.certificate || 'A', this.moduleId, this.chapterId);
@@ -310,17 +484,6 @@ export default class QuizView extends AbstractView {
         this.renderGrid();
         this.renderQuestion(this.state.currentQIndex, 'initial');
         this.startTimer();
-
-        // 1.5s Perception Lock Reveal
-        setTimeout(() => {
-            const skel = document.getElementById('quizSkeletonLayer');
-            const data = document.getElementById('quizLayoutContainer');
-            if (skel) skel.classList.add('hidden-layer');
-            if (data) {
-                data.classList.remove('hidden-layer');
-                data.classList.add('visible-layer');
-            }
-        }, 1000);
 
         document.getElementById('btnPrevQ').onclick = () => this.navigateQuestion(-1);
         document.getElementById('btnNextQ').onclick = () => this.navigateQuestion(1);
@@ -425,12 +588,7 @@ export default class QuizView extends AbstractView {
   }
 
   renderError(msg) {
-      const skel = document.getElementById('quizSkeletonLayer');
-      if (skel) skel.classList.add('hidden-layer');
-      
       const container = document.getElementById('quizLayoutContainer');
-      container.classList.remove('hidden-layer');
-      container.classList.add('visible-layer');
       
       container.innerHTML = `
           <div class="question-panel" style="width: 100%;">
@@ -512,7 +670,7 @@ export default class QuizView extends AbstractView {
         let optionsHtml = q.options.map((opt, i) => {
             const isSelected = this.state.answers[index] === i;
             return `
-                <div class="option-card ${isSelected ? 'selected' : ''}" data-index="${i}">
+                <div class="option-card tier-b ${isSelected ? 'selected' : ''}" data-index="${i}">
                     <div class="option-letter">${letters[i]}</div>
                     <div>${opt}</div>
                 </div>

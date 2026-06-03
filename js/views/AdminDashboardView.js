@@ -287,7 +287,40 @@ export default class AdminDashboardView extends AbstractView {
         
         #pageIndicator { cursor: pointer; padding: 6px 16px; background: var(--bg-elevated); border-radius: var(--radius-md); transition: 0.2s; font-weight: 600; color: white; border: 1px solid var(--border-color); }
         #pageIndicator:hover { background: var(--accent-primary); border-color: var(--accent-primary); box-shadow: var(--shadow-glow); }
-      </style>
+      
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+
+          .pane-left, .pane-mid, .pane-right {
+            width: 100% !important;
+            height: auto !important;
+            flex: none !important;
+          }
+          .admin-dashboard, .pane-container, .workspace-container, .admin-layout-container {
+            flex-direction: column !important;
+            display: flex !important;
+            height: auto !important;
+          }
+          .resizer { display: none !important; }
+        }\n</style>
       
       <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
       

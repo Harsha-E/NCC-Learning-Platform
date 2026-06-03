@@ -3,6 +3,7 @@ import Store from '../core/store.js';
 import QuizService from '../services/quiz.service.js';
 import ProgressService from '../services/progress.service.js';
 import Router from '../core/router.js';
+import HeroGeometric from '../components/HeroGeometric.js';
 
 export default class QuizzesView extends AbstractView {
   constructor(params) {
@@ -31,13 +32,14 @@ export default class QuizzesView extends AbstractView {
 
         .quizzes-viewport {
             min-height: 100dvh;
-            background-color: var(--bg-deep);
+            background-color: transparent;
             /* STRICT NAVBAR & DOCK CLEARANCE */
             padding: 8rem 1.5rem 6rem 1.5rem !important; 
             box-sizing: border-box;
             color: var(--text-pure);
             font-family: "SF Pro Display", "Inter", sans-serif;
             overflow-x: hidden;
+            position: relative; z-index: 10;
         }
 
         .quizzes-container { 
@@ -67,11 +69,11 @@ export default class QuizzesView extends AbstractView {
         }
 
         .quiz-card {
-            background: var(--bg-card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border-glass); border-radius: var(--radius-lg);
+            background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg);
             padding: 1.75rem 2.5rem; display: flex; align-items: center; justify-content: space-between;
-            gap: 2rem; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative; overflow: hidden;
+            gap: 2rem;
+            position: relative; overflow: visible;
         }
         
         .quiz-card:hover { 
@@ -85,6 +87,7 @@ export default class QuizzesView extends AbstractView {
         .quiz-card::before {
             content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
             background: rgba(255,255,255,0.1); transition: 0.3s;
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
         }
         .quiz-card:hover::before { background: var(--tech-blue); box-shadow: 0 0 15px var(--tech-blue); }
 
@@ -133,16 +136,9 @@ export default class QuizzesView extends AbstractView {
 
       <div class="quizzes-viewport">
           <div class="quizzes-container">
-              <div class="header-section">
-                  <div class="sys-badge">Telemetry Diagnostics</div>
-                  <h1 class="header-title">Tactical Assessments</h1>
-                  <p class="header-desc">Analyze your curriculum mastery through secure mission evaluations.</p>
-              </div>
+              <div class="header-section" id="quizzes-hero-container" style="padding:0; min-height: 250px; margin-bottom: 3.5rem; border-radius: var(--radius-lg); overflow: hidden;"></div>
               
               <div class="quiz-list" id="quizList">
-                  <div class="skeleton-card"></div>
-                  <div class="skeleton-card"></div>
-                  <div class="skeleton-card"></div>
               </div>
           </div>
       </div>
@@ -166,6 +162,14 @@ export default class QuizzesView extends AbstractView {
 
         this.quizzes = availableQuizzes;
         this.progress = userProgress;
+        
+        this.bg = new HeroGeometric('quizzes-hero-container', {
+            title1: 'Tactical',
+            title2: 'Assessments',
+            description: 'Analyze your curriculum mastery through secure mission evaluations.'
+        });
+        this.bg.mount();
+
         this.renderQuizzes();
 
     } catch (error) {
@@ -176,7 +180,7 @@ export default class QuizzesView extends AbstractView {
   renderQuizzes() {
       const list = document.getElementById('quizList');
       if (!this.quizzes.length) {
-          list.innerHTML = `<div style="color: var(--text-muted); text-align:center; padding: 3rem;">No authorized assessments found for your clearance level.</div>`;
+          list.innerHTML = `<div style="color: var(--text-pure); text-align:center; padding: 3rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); font-weight: 600;">No authorized assessments found for your clearance level.</div>`;
           return;
       }
 
@@ -189,7 +193,8 @@ export default class QuizzesView extends AbstractView {
                   border-radius: 20px;
               }
               .emb-inner {
-                  background: #020617; border-radius: 19px; padding: 2rem 2.5rem;
+                  background: rgba(15, 20, 25, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                  border-radius: 19px; padding: 2rem 2.5rem;
                   display: flex; justify-content: space-between; align-items: center;
               }
               .emb-tag { color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
@@ -208,7 +213,7 @@ export default class QuizzesView extends AbstractView {
           </style>
 
           <div class="elite-mock-banner">
-              <div class="emb-inner">
+              <div class="emb-inner tier-a">
                   <div class="emb-text">
                       <span class="emb-tag">Strict Mode Active</span>
                       <h2 class="emb-title">Parametric Mock Exam</h2>
@@ -242,7 +247,7 @@ export default class QuizzesView extends AbstractView {
           }
 
           html += `
-              <div class="quiz-card">
+              <div class="quiz-card tier-a">
                   <div class="qc-content">
                       <div class="qc-header">
                           <span class="qc-tag">${quiz.moduleTitle || 'Operational'}</span>
@@ -281,5 +286,12 @@ export default class QuizzesView extends AbstractView {
               if (route) window.Router.navigateTo(route);
           };
       });
+  }
+
+  async destroy() {
+      if (this.bg) {
+          this.bg.destroy();
+          this.bg = null;
+      }
   }
 }

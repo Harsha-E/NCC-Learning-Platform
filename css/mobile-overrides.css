@@ -1,0 +1,134 @@
+/* 
+ * Tactical Mobile Overrides for PWA
+ * Additive Overlay Strategy - No core layout rewrites
+ * STRICT EXECUTION: ZERO Desktop Mutation
+ */
+
+@media (max-width: 768px) {
+
+  /* =========================================
+     1. Fluid Typography Scaling
+     ========================================= */
+  h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+  h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+  h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+  p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+  /* =========================================
+     2. Accessible Touch Targets (48x48px min)
+     ========================================= */
+  .btn, 
+  .opt-btn, 
+  .nav-item,
+  .mcq-option,
+  .tab-node,
+  button,
+  a.button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box !important;
+  }
+
+  /* =========================================
+     3. Safe Areas (Prevent Browser UI Overlap)
+     ========================================= */
+  .workstation, 
+  .reader-layout, 
+  .quiz-viewport, 
+  .dash-viewport {
+    padding-bottom: 6rem !important;
+  }
+
+  /* =========================================
+     4. Admin Dashboard 3-Pane Stacking
+     ========================================= */
+  /* Target the container of the 3 panes to force column stack */
+  .admin-layout-container,
+  .workspace-container,
+  .pane-container {
+    flex-direction: column !important;
+    display: flex !important;
+    height: auto !important;
+  }
+
+  .pane-left, 
+  .pane-mid, 
+  .pane-right {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    flex: none !important;
+  }
+
+  /* Hide resizer elements completely */
+  .resizer {
+    display: none !important;
+  }
+
+  /* Ensure PDF viewer stacks above Quill editor if in same pane */
+  .pdf-viewer-container {
+    order: -1 !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* =========================================
+     5. Assessment Builder / Tree Builder
+     ========================================= */
+  .builder-container,
+  .tree-container {
+    flex-wrap: wrap !important;
+  }
+
+  .tree-input,
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* =========================================
+     6. Quiz / Mock Exam UI Collapse
+     ========================================= */
+  .quiz-layout,
+  .mock-exam-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Force options grid to stack block-style */
+  .options-grid {
+    display: block !important;
+  }
+
+  .options-grid .opt-btn,
+  .options-grid .mcq-option {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Drop the sidebar below the active question */
+  .sidebar-panel,
+  .question-navigator {
+    order: 2 !important; /* Forces it below the main content */
+    width: 100% !important;
+    position: relative !important;
+    bottom: auto !important;
+    transform: none !important;
+    border-radius: 8px !important;
+    margin-top: 24px !important;
+  }
+
+  /* Ensure main question content sits above the navigator */
+  .question-main-content,
+  .active-question {
+    order: 1 !important;
+  }
+}

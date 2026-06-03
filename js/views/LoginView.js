@@ -54,26 +54,6 @@ export default class LoginView extends AbstractView {
             pointer-events: none;
         }
 
-        /* 2D Radar Canvas Background */
-        #radar-canvas {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0; opacity: 0.6; pointer-events: none;
-        }
-
-        /* Scanning Line Overlay */
-        .scan-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, transparent, var(--hud-primary), transparent);
-            box-shadow: 0 0 20px var(--hud-primary);
-            opacity: 0.5; z-index: 1; pointer-events: none;
-            animation: scan 6s linear infinite;
-        }
-
-        @keyframes scan {
-            0% { transform: translateY(-100vh); }
-            100% { transform: translateY(100vh); }
-        }
-
         /* The Main Command Panel */
         .hud-card {
             background: var(--hud-panel); border: 1px solid rgba(10, 132, 255, 0.2);
@@ -213,6 +193,7 @@ export default class LoginView extends AbstractView {
 
           <div class="hud-header">
             <div class="sys-status">Connection Established</div>
+            <img src="./assets/branding/logo-primary.png" alt="Logo" style="width: 80px; height: 80px; margin-bottom: 1rem; filter: drop-shadow(0 0 20px var(--hud-glow));">
             <h1 class="auth-title">Learning Access</h1>
             <div style="display:flex; justify-content:center;">
                 <p class="typewriter">Enter clearance codes to proceed.</p>

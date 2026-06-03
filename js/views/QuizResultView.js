@@ -3,6 +3,7 @@ import Store from '../core/store.js';
 import Router from '../core/router.js';
 import ContentService from '../services/content.service.js';
 import ProgressService from '../services/progress.service.js';
+import GamificationService from '../services/GamificationService.js';
 
 export default class QuizResultView extends AbstractView {
   constructor(params) {
@@ -132,9 +133,8 @@ export default class QuizResultView extends AbstractView {
             border-radius: var(--radius-bento); padding: 2rem;
             display: flex; flex-direction: column; justify-content: space-between;
             animation: slideUpFade 0.6s ease-out both;
-            transition: transform 0.3s ease, background 0.3s ease;
         }
-        .bento-card:hover { background: var(--panel-hover); border-color: var(--border-highlight); transform: translateY(-4px); }
+        .bento-card:hover { background: var(--panel-hover); }
 
         .bento-label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
         .bento-value { font-size: 2.5rem; font-weight: 800; color: var(--text-pure); letter-spacing: -0.02em; line-height: 1; }
@@ -325,17 +325,17 @@ export default class QuizResultView extends AbstractView {
 
       html += `
           <div class="bento-grid">
-              <div class="bento-card" style="animation-delay: 0.1s;">
+              <div class="bento-card tier-a" style="animation-delay: 0.1s;">
                   <div class="bento-label">Accuracy Target</div>
                   <div class="bento-value">${rawCorrect}</div>
                   <div class="bento-sub">Correct Answers</div>
               </div>
-              <div class="bento-card" style="animation-delay: 0.15s;">
+              <div class="bento-card tier-a" style="animation-delay: 0.15s;">
                   <div class="bento-label">Deficit</div>
                   <div class="bento-value" style="color: ${incorrectCount > 0 ? 'var(--accent-red)' : 'var(--text-pure)'}">${incorrectCount}</div>
                   <div class="bento-sub">Incorrect Answers</div>
               </div>
-              <div class="bento-card" style="animation-delay: 0.2s;">
+              <div class="bento-card tier-a" style="animation-delay: 0.2s;">
                   <div class="bento-label">Velocity</div>
                   <div class="bento-value">${avgTime}</div>
                   <div class="bento-sub">Avg. Time Per Question</div>

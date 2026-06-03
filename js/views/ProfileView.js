@@ -1,6 +1,8 @@
 import AbstractView from '../core/AbstractView.js';
 import Store from '../core/store.js';
 import AuthService from '../services/auth.service.js';
+import HeroGeometric from '../components/HeroGeometric.js';
+import GamificationService from '../services/GamificationService.js';
 
 export default class ProfileView extends AbstractView {
   async getHtml() {
@@ -22,13 +24,14 @@ export default class ProfileView extends AbstractView {
 
         .profile-viewport {
             min-height: 100dvh;
-            background-color: var(--bg-deep);
+            background-color: transparent;
             /* 8rem top clears navbar, 6rem bottom clears mobile dock */
             padding: 8rem 1.5rem 6rem 1.5rem; 
             box-sizing: border-box;
             color: var(--text-pure);
             font-family: "SF Pro Display", "Inter", sans-serif;
             overflow-y: auto;
+            position: relative; z-index: 10;
         }
 
         .profile-container {
@@ -108,30 +111,8 @@ export default class ProfileView extends AbstractView {
 
       <div class="profile-viewport">
           <div class="profile-container">
-            <div id="skeletonLayer">
-                <div class="profile-header">
-                    <div class="sk-header"></div>
-                    <div class="sk-sub"></div>
-                </div>
-                <div class="profile-skeleton">
-                    <div class="sk-label"></div><div class="sk-input"></div>
-                    <div class="form-grid">
-                        <div><div class="sk-label"></div><div class="sk-input"></div></div>
-                        <div><div class="sk-label"></div><div class="sk-input"></div></div>
-                    </div>
-                    <div class="form-grid">
-                        <div><div class="sk-label"></div><div class="sk-input"></div></div>
-                        <div><div class="sk-label"></div><div class="sk-input"></div></div>
-                    </div>
-                    <div class="sk-btn"></div>
-                </div>
-            </div>
-
-            <div id="dataLayer" class="hidden-layer">
-              <div class="profile-header">
-                <h1>Deployment Profile</h1>
-                <p>Manage your operational identity and training protocols</p>
-              </div>
+            <div id="dataLayer">
+              <div class="profile-header" id="profile-hero-container" style="padding:0; min-height: 250px; margin-bottom: 2.5rem; border-radius: 24px; overflow: hidden;"></div>
               <div class="profile-card">
                 <form id="profileForm">
                   
@@ -184,11 +165,12 @@ export default class ProfileView extends AbstractView {
 
   async mount() {
     this.hydrateForm(Store.get('profile'), Store.get('user'));
-    setTimeout(() => {
-        document.getElementById('skeletonLayer').style.display = 'none';
-        document.getElementById('dataLayer').classList.remove('hidden-layer');
-        document.getElementById('dataLayer').classList.add('visible-layer');
-    }, 1000);
+    this.bg = new HeroGeometric('profile-hero-container', {
+        title1: 'Deployment',
+        title2: 'Profile',
+        description: 'Manage your operational identity and training protocols'
+    });
+    this.bg.mount();
 
     this.unsubscribe = Store.subscribe('profile', (newProfile) => {
       this.hydrateForm(newProfile, Store.get('user'));
@@ -262,5 +244,9 @@ export default class ProfileView extends AbstractView {
 
   async destroy() {
     if (typeof this.unsubscribe === 'function') this.unsubscribe();
+    if (this.bg) {
+        this.bg.destroy();
+        this.bg = null;
+    }
   }
 }

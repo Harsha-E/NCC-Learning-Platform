@@ -19,6 +19,8 @@ const ROUTES = {
   '/mock-test': { view: () => import('../views/MockTestView.js'), rules: { requireAuth: true } },
   '/forgot-password': { view: () => import('../views/ForgotPasswordView.js'), rules: { guestOnly: true } },
   '/profile': { view: () => import('../views/ProfileView.js'), rules: { requireAuth: true } },
+  '/notifications': { view: () => import('../views/NotificationCenterView.js'), rules: { requireAuth: true } },
+  '/leaderboard': { view: () => import('../views/LeaderboardView.js'), rules: { requireAuth: true } },
   '/admin/dashboard': { view: () => import('../views/AdminDashboardView.js'), rules: { requireAuth: true, role: 'admin' } },
   '/admin/blueprint': { view: () => import('../views/BlueprintView.js'), rules: { requireAuth: true, role: 'admin' } },
   '/mock-exam': { view: () => import('../views/MockExamView.js'), rules: { requireAuth: true } },
@@ -172,6 +174,11 @@ export default class Router {
   static async navigate() {
     const appRoot = document.getElementById('app-root');
     const startTime = Date.now(); 
+
+    if (window.InstallGate && !window.InstallGate.isInstalled()) {
+         window.InstallGate.checkAndShowGate();
+         return; // Abort routing
+    }
 
     if (appRoot) {
       appRoot.style.opacity = '0';

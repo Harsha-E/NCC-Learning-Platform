@@ -59,6 +59,42 @@ service cloud.firestore {
       allow read, write: if isOwner(uid) && isAuth();
       allow read, write: if isAdmin();
     }
+    
+    // Quiz Results - append only for users
+    match /quiz_results/{resultId} {
+      // Assuming resultId has uid embedded, or we just allow users to read their own via queries
+      allow read: if isAuth(); 
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Gamification Seasons (Aggregated Leaderboards) - readable by all, writable by Cloud Functions/Admins
+    match /gamification_seasons/{seasonId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+      
+      match /users/{uid} {
+        allow read: if isAuth();
+        allow write: if isOwner(uid) && isAuth();
+      }
+    }
+    
+    // Gamification Events - clients can push events for the server to validate
+    match /gamification_events/{uid}/pending/{eventId} {
+      allow read, create: if isOwner(uid) && isAuth();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Telemetry & Errors - append only
+    match /telemetry_events/{document=**} {
+      allow create: if isAuth();
+      allow read, update, delete: if isAdmin();
+    }
+    
+    match /error_logs/{document=**} {
+      allow create: if isAuth();
+      allow read, update, delete: if isAdmin();
+    }
 
     // Audit logs - admin only
     match /auditLogs/{logId} {

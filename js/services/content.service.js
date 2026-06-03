@@ -1,5 +1,7 @@
 import { getDbInstance, collection, getDocs, doc, getDoc } from '../core/firebase-init.js';
 import CacheService from '../core/cache.js';
+import NotificationService from './NotificationService.js';
+import Store from '../core/store.js';
 
 const ContentService = {
   normalizeCertId(cert) {
@@ -30,6 +32,18 @@ const ContentService = {
               console.warn(`🚨 [ContentService] New Curriculum Detected (Cloud: ${cloudVersion} > Local: ${localVersion}). Wiping Cache...`);
               await CacheService.invalidateAll();
               await CacheService.set('local_content_version', cloudVersion);
+              
+              if (localVersion > 0) {
+                  const prefs = Store.get('notification_prefs') || {};
+                  if (prefs.syllabus_updates !== false) {
+                      await NotificationService.createLocalNotification(
+                          "Curriculum Updated",
+                          "The NCC command has issued new training material. Your local cache has been synchronized.",
+                          "syllabus",
+                          "/learning"
+                      );
+                  }
+              }
           } else {
               console.log("✅ [ContentService] Curriculum is up to date. Using Offline Cache.");
           }

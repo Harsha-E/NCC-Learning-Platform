@@ -11,6 +11,7 @@ import {
   serverTimestamp
 } from '../core/firebase-init.js';
 import Store from '../core/store.js';
+import { CONFIG } from '../core/config.js';
 
 // Import Firebase Auth functions directly
 import { 
@@ -73,7 +74,7 @@ const AuthService = {
     await sendEmailVerification(user);
     
     // Create user document in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
+    await setDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, user.uid), {
       displayName: fullName,
       email: email,
       serviceNumber: serviceNumber,
@@ -102,7 +103,7 @@ const AuthService = {
     const user = userCredential.user;
 
     // 2. Fetch the role from Firestore FIRST
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, user.uid));
     const userData = userDoc.exists() ? userDoc.data() : {};
     const role = userData.role || 'cadet';
 
@@ -115,7 +116,7 @@ const AuthService = {
     }
 
     // 4. Update last login
-    await setDoc(doc(db, 'users', user.uid), {
+    await setDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, user.uid), {
       lastLoginAt: serverTimestamp(),
       // Ensure Firestore also records them as verified if we are bypassing
       emailVerified: user.emailVerified || (role === 'admin' || role === 'superadmin')
@@ -132,7 +133,7 @@ const AuthService = {
          
     // Check if user is admin via Firestore instead of claims
     const db = getDbInstance();
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+    const userDoc = await getDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, userCredential.user.uid));
     
     let role = 'cadet';
     if (userDoc.exists()) {
@@ -157,7 +158,7 @@ const AuthService = {
   async getProfile(uid) {
     try {
       const db = getDbInstance();
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      const userDoc = await getDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, uid));
       
       if (userDoc.exists()) {
         return { id: userDoc.id, ...userDoc.data() };
@@ -172,7 +173,7 @@ const AuthService = {
   // Update profile
   async updateProfile(uid, data) {
     const db = getDbInstance();
-    await setDoc(doc(db, 'users', uid), data, { merge: true });
+    await setDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, uid), data, { merge: true });
     
     // Update store
     const profile = await this.getProfile(uid);
@@ -184,7 +185,7 @@ const AuthService = {
   // Complete onboarding
   async completeOnboarding(uid, certificate, wing) {
     const db = getDbInstance();
-    await setDoc(doc(db, 'users', uid), {
+    await setDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, uid), {
       certificate: certificate,
       wing: wing,
       onboardingComplete: true,

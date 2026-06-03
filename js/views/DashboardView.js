@@ -2,7 +2,9 @@ import AbstractView from '../core/AbstractView.js';
 import Store from '../core/store.js';
 import ContentService from '../services/content.service.js';
 import ProgressService from '../services/progress.service.js';
+import GamificationService from '../services/GamificationService.js';
 import Router from '../core/router.js';
+import HeroGeometric from '../components/HeroGeometric.js';
 
 export default class DashboardView extends AbstractView {
   constructor(params) {
@@ -31,19 +33,35 @@ export default class DashboardView extends AbstractView {
 
         .stats-viewport {
             min-height: 100dvh; 
-            background: var(--bg-base); 
+            background: transparent; 
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
             
             /* STRICT CLEARANCES FOR NAVBAR AND MOBILE DOCK */
-            padding: 8rem 1.5rem 6.5rem 1.5rem !important; 
+            padding: 10rem 1.5rem 6.5rem 1.5rem !important; 
             box-sizing: border-box;
             overflow-x: hidden;
+            position: relative;
+            z-index: 10;
         }
 
         .stats-container { max-width: 1000px; margin: 0 auto; box-sizing: border-box; }
 
-        .hero-header { margin-bottom: 3rem; animation: fadeInDown 0.6s ease-out; }
+        .hero-header { 
+            position: relative;
+            max-height: 300px;
+            overflow: hidden;
+            margin: -10rem -1.5rem 3rem -1.5rem; 
+            padding: 10rem 1.5rem 3rem 1.5rem;
+            border-bottom: 1px solid var(--border-glass);
+            animation: fadeInDown 0.6s ease-out; 
+        }
+        .hero-header-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
         .hero-header h1 { 
             color: #F8FAFC;
             font-size: clamp(2.2rem, 5vw, 3rem);
@@ -60,14 +78,13 @@ export default class DashboardView extends AbstractView {
         }
 
         .metric-card {
-            background: var(--bg-elevated); border-radius: var(--radius-xl); padding: 2rem;
+            background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl); padding: 2rem;
             display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid var(--border-glass);
-            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1);
             animation: zoomIn 0.5s ease-out backwards;
-            position: relative; overflow: hidden;
+            position: relative; overflow: visible;
         }
-        .metric-card:hover { transform: translateY(-4px); background: #1C1C1E; border-color: rgba(255,255,255,0.15); }
 
         .metric-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
         .metric-icon svg { width: 24px; height: 24px; stroke-width: 2.5; stroke: currentColor; fill: none; }
@@ -108,10 +125,10 @@ export default class DashboardView extends AbstractView {
 
         /* AWWWARDS-STYLE FINAL SIMULATION CARD */
         .premium-mock-card {
-            padding: 2.5rem; background: linear-gradient(145deg, #0F172A 0%, #020617 100%);
-            border: 1px solid var(--border-glass); border-radius: var(--radius-xl);
+            padding: 2.5rem; background: rgba(15, 20, 25, 0.5); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-xl);
             display: flex; justify-content: space-between; align-items: center;
-            position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: visible; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             animation: fadeInDown 0.6s ease-out backwards; animation-delay: 0.4s;
         }
         .premium-mock-card::before {
@@ -136,10 +153,14 @@ export default class DashboardView extends AbstractView {
            ========================================================================== */
         @media(max-width: 768px) {
             .stats-viewport { padding-top: 6.5rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+            .hero-header { margin: -6.5rem -1rem 2rem -1rem; padding: 6.5rem 1rem 2rem 1rem; }
             
             .metric-card { padding: 1.75rem; border-radius: 20px; }
             .metric-icon { width: 42px; height: 42px; margin-bottom: 1rem; }
             .metric-icon svg { width: 20px; height: 20px; }
+            
+            .xp-bar-container { width: 100%; background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; margin-top: 15px; overflow: hidden; }
+            .xp-bar-fill { height: 100%; background: var(--accent-blue); border-radius: 10px; transition: width 1s ease-out; box-shadow: 0 0 10px var(--accent-blue); }
             
             .action-banner { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.75rem; border-radius: 20px; }
             .action-buttons { width: 100%; flex-direction: column; gap: 0.75rem; }
@@ -152,10 +173,35 @@ export default class DashboardView extends AbstractView {
 
       <div class="stats-viewport">
           <div class="stats-container" id="statsContainer">
-              <div style="text-align:center; padding: 4rem; color: var(--text-muted);">
+              <div style="text-align:center; padding: 4rem; color: var(--text-main); text-shadow: 0 2px 10px rgba(0,0,0,0.8); font-weight: 600;">
                   <div style="width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top-color:var(--accent-blue); border-radius:50%; animation:spin 1s linear infinite; margin: 0 auto 1rem auto;"></div>
                   Synchronizing Telemetry...
-                  <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+                  <style>@keyframes spin { 100% { transform: rotate(360deg); } }
+        /* MOBILE OVERRIDES (INJECTED) */
+        @media (max-width: 768px) {
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+          h3 { font-size: clamp(1.25rem, 4vw, 1.75rem) !important; }
+          p  { font-size: clamp(1rem, 3.5vw, 1.125rem) !important; }
+
+          .btn, .opt-btn, .nav-item, .mcq-option, .tab-node, button, a.button {
+            min-height: 48px !important;
+            min-width: 48px !important;
+            padding: 12px 16px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box !important;
+          }
+
+          .workstation, .reader-layout, .quiz-viewport, .dash-viewport, .stats-viewport {
+            padding-bottom: 6rem !important;
+          }
+
+          .metrics-grid, .bento-grid, .stats-grid, .cards-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }\n</style>
               </div>
           </div>
       </div>
@@ -206,6 +252,14 @@ export default class DashboardView extends AbstractView {
               avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0
           };
 
+          const gStats = await GamificationService.getStats(user.uid) || { xp: 0, streakDays: 0 };
+          this.gamification = {
+              streak: gStats.streakDays || 0,
+              progress: GamificationService.getLevelProgress(gStats.xp || 0),
+              nextRank: await GamificationService.getNextRank(gStats.xp || 0),
+              missions: await GamificationService.checkAndGenerateMissions(user.uid)
+          };
+
           this.renderUI(rawName);
       } catch (e) { 
           console.error(e); 
@@ -215,22 +269,29 @@ export default class DashboardView extends AbstractView {
 
   renderUI(name) {
       document.getElementById('statsContainer').innerHTML = `
-          <div class="hero-header">
-              <h1>Telemetry Overview, ${name}.</h1>
-              <p>Real-time analytics of your tactical training progression.</p>
-          </div>
+          <div class="hero-header" id="dash-hero-container" style="padding:0; min-height: 350px;"></div>
 
           <div class="metrics-grid">
-              <div class="metric-card" style="animation-delay: 0.1s;">
-                  <div class="metric-icon icon-blue">
-                      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              <div class="metric-card tier-a" style="animation-delay: 0.1s;">
+                  <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                      <div class="metric-icon icon-blue" style="margin-bottom:0;">
+                          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      </div>
+                      <span style="font-weight:800; font-size:1.2rem; color:var(--text-main);">Lvl ${this.gamification.progress.level}</span>
                   </div>
-                  <div>
-                      <div class="metric-val" id="animRead">0</div>
-                      <div class="metric-label">Chapters Cleared</div>
+                  <div style="width:100%; margin-top: 1.5rem;">
+                      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                          <div>
+                              <div class="metric-label" style="color:var(--accent-blue); margin-top:0;">${this.gamification.progress.rank}</div>
+                              <div style="font-size: 0.9rem; color:var(--text-muted); font-weight:600; margin-top:4px;">${this.gamification.progress.currentXp} / ${this.gamification.progress.nextLevelXp} XP</div>
+                          </div>
+                      </div>
+                      <div class="xp-bar-container">
+                          <div class="xp-bar-fill" style="width: ${this.gamification.progress.percentage}%"></div>
+                      </div>
                   </div>
               </div>
-              <div class="metric-card" style="animation-delay: 0.15s;">
+              <div class="metric-card tier-a" style="animation-delay: 0.15s;">
                   <div class="metric-icon icon-green">
                       <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                   </div>
@@ -239,7 +300,7 @@ export default class DashboardView extends AbstractView {
                       <div class="metric-label">Global Completion</div>
                   </div>
               </div>
-              <div class="metric-card" style="animation-delay: 0.2s;">
+              <div class="metric-card tier-a" style="animation-delay: 0.2s;">
                   <div class="metric-icon icon-purple">
                       <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
                   </div>
@@ -249,6 +310,8 @@ export default class DashboardView extends AbstractView {
                   </div>
               </div>
           </div>
+
+          ${this.renderGamificationZone()}
 
           <div class="action-banner">
               <div class="action-banner-text">
@@ -261,7 +324,7 @@ export default class DashboardView extends AbstractView {
               </div>
           </div>
 
-          <div class="premium-mock-card">
+          <div class="premium-mock-card tier-a">
               <div class="pmc-content">
                   <span class="pmc-badge">Deployment Authorized</span>
                   <h2 class="pmc-title">Final Simulation</h2>
@@ -274,6 +337,17 @@ export default class DashboardView extends AbstractView {
           </div>
       `;
 
+      const streakBadge = this.gamification.streak > 0 
+          ? `<span style="background: rgba(255,149,0,0.15); border: 1px solid rgba(255,149,0,0.3); color: #FF9500; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; margin-left: 10px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 0 15px rgba(255,149,0,0.2);">🔥 ${this.gamification.streak} Day Streak</span>` 
+          : '';
+
+      this.bg = new HeroGeometric('dash-hero-container', {
+          title1: 'Command',
+          title2: 'Center',
+          description: `Tactical training progression for ${name}.<br><div style="margin-top:15px;">${streakBadge}</div>`
+      });
+      this.bg.mount();
+
       this.animateNumber('animRead', this.stats.totalRead, '');
       this.animateNumber('animProg', this.stats.globalProgress, '%');
       this.animateNumber('animScore', this.stats.avgScore, '%');
@@ -285,6 +359,51 @@ export default class DashboardView extends AbstractView {
               Router.navigateTo(link.getAttribute('href'));
           };
       });
+  }
+
+  renderGamificationZone() {
+      let nextRankHTML = '';
+      if (this.gamification.nextRank) {
+          const xpRemaining = this.gamification.nextRank.xp - this.gamification.progress.currentXp;
+          nextRankHTML = `
+              <div class="premium-mock-card tier-a" style="margin-bottom: 1.5rem; animation-delay: 0.25s;">
+                  <div class="pmc-content">
+                      <span class="pmc-badge">Next Rank Progress</span>
+                      <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Current: ${this.gamification.progress.rank}</div>
+                      <h2 class="pmc-title">Next: ${this.gamification.nextRank.rank}</h2>
+                      <p class="pmc-desc">${this.gamification.progress.currentXp} / ${this.gamification.nextRank.xp} XP</p>
+                  </div>
+                  <div style="text-align: right; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                      <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-green); line-height: 1;">${xpRemaining} XP</div>
+                      <div style="color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">Remaining</div>
+                  </div>
+              </div>
+          `;
+      }
+
+      let missionsHTML = '';
+      if (this.gamification.missions && this.gamification.missions.daily) {
+          const dailies = this.gamification.missions.daily.map(m => `
+              <div style="background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 12px; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+                  <div>
+                      <div style="font-weight: 700; font-size: 1.05rem; color: #FFF; margin-bottom: 4px;">${m.title}</div>
+                      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">${m.progress} / ${m.target} Completed</div>
+                  </div>
+                  <div style="background: rgba(48, 209, 88, 0.15); color: var(--accent-green); padding: 6px 14px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: 1px solid rgba(48, 209, 88, 0.3);">
+                      +${m.reward} XP
+                  </div>
+              </div>
+          `).join('');
+
+          missionsHTML = `
+              <div class="metric-card mission-card tier-a" style="margin-bottom: 3rem; animation-delay: 0.3s; display: block;">
+                  <h3 style="margin: 0 0 1.25rem 0; font-size: 1.4rem; font-weight: 800; color: #FFF; letter-spacing: -0.02em;">Daily Missions</h3>
+                  ${dailies}
+              </div>
+          `;
+      }
+
+      return nextRankHTML + missionsHTML;
   }
 
   animateNumber(id, end, suffix) {
@@ -308,5 +427,12 @@ export default class DashboardView extends AbstractView {
               el.textContent = end + suffix; 
           }
       }, stepTime);
+  }
+
+  async destroy() {
+      if (this.bg) {
+          this.bg.destroy();
+          this.bg = null;
+      }
   }
 }

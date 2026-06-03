@@ -22,6 +22,11 @@
   --text-primary: #1A1A1A;
   --text-secondary: #555555;
   --border-color: #E0E0E0;
+
+  /* Global Surface System */
+  --surface-0: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  --surface-1: linear-gradient(145deg, #e3f2fd, #bbdefb);
+  --surface-2: rgba(255, 255, 255, 0.7);
   
   --accent-primary: var(--saffron-500);
   --accent-secondary: var(--green-500);
@@ -85,6 +90,11 @@
 
   /* 5. Sharper, highly visible border to separate elements */
   --border-color: #3A3A5A;   
+
+  /* Global Surface System (Dark Mode Premium Gradients) */
+  --surface-0: radial-gradient(circle at top left, #12121a, #050508);
+  --surface-1: linear-gradient(180deg, rgba(10, 132, 255, 0.05) 0%, transparent 100%);
+  --surface-2: rgba(30, 30, 54, 0.6);
   
   /* Accents */
   --accent-primary: var(--saffron-500); 

@@ -26,7 +26,8 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
-  getCountFromServer
+  getCountFromServer,
+  increment
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 import { 
   getStorage, 
@@ -39,19 +40,23 @@ import {
   getFunctions,
   httpsCallable
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js';
+import { 
+  getDatabase, 
+  ref as rtdbRef, 
+  set, 
+  get, 
+  child, 
+  update as rtdbUpdate, 
+  onValue 
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-// Firebase Configuration - Replace with your project config
-const firebaseConfig = {
-  apiKey: "AIzaSyCn_WXWKO1KJ-VF0CuxlHItDpWlqBb2H68",
-  authDomain: "ncc-cadet-platform.firebaseapp.com",
-  projectId: "ncc-cadet-platform",
-  storageBucket: "ncc-cadet-platform.firebasestorage.app",
-  messagingSenderId: "446822209995",
-  appId: "1:446822209995:web:2dc7ec4220301fb080be4e"
-};
-initializeApp(firebaseConfig);
+import { CONFIG } from './config.js';
+
+// Firebase Configuration from Centralized Config
+const firebaseConfig = CONFIG.FIREBASE;
+
 // Initialize Firebase
-let app, auth, db, storage, functions;
+let app, auth, db, storage, functions, database;
 
 function initFirebase() {
   if (!app) {
@@ -60,8 +65,9 @@ function initFirebase() {
     db = getFirestore(app);
     storage = getStorage(app);
     functions = getFunctions(app);
+    database = getDatabase(app);
   }
-  return { app, auth, db, storage, functions };
+  return { app, auth, db, storage, functions, database };
 }
 
 // Get auth instance
@@ -86,6 +92,12 @@ function getStorageInstance() {
 function getFunctionsInstance() {
   initFirebase();
   return functions;
+}
+
+// Get database instance
+function getDatabaseInstance() {
+  initFirebase();
+  return database;
 }
 
 // Set auth persistence
@@ -120,7 +132,7 @@ function onAuthChange(callback) {
 
         try {
           // Instead of checking the token claims, we query Firestore directly!
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const userDoc = await getDoc(doc(db, CONFIG.COLLECTIONS.FIRESTORE.USERS, user.uid));
           if (userDoc.exists()) {
             role = userDoc.data().role || 'cadet';
           }
@@ -183,6 +195,7 @@ export {
   getDbInstance,
   getStorageInstance,
   getFunctionsInstance,
+  getDatabaseInstance,
   setAuthPersistence,
   onAuthChange,
   waitForAuthReady,
@@ -205,11 +218,19 @@ export {
   serverTimestamp,
   writeBatch,
   getCountFromServer,
+  increment,
   // Storage helpers
   storageRef,
   uploadBytes,
   getDownloadURL,
   deleteObject,
   // Functions helpers
-  httpsCallable
+  httpsCallable,
+  // Database helpers
+  rtdbRef,
+  set,
+  get,
+  child,
+  rtdbUpdate,
+  onValue
 };
